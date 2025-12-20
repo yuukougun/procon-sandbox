@@ -106,7 +106,7 @@ repository
 > 状態変化をgifとして保存するのもあり
 
 >### `run.sh`ファイル
-> ファイルのコンパイルや実行などターミナルで実行するコマンド処理は全てこれで行う。<br>
+> ファイルのコンパイルや実行などターミナルで実行するコマンド処理は全てこれで行う。（gitコマンドは除く）<br>
 > makefileでオブジェクトファイルの作成やリンクもこれで行う。
 
 </details>
@@ -231,19 +231,8 @@ class MyClass{
 }
 ```
 
-> クラスがvectorに似た挙動をするならvectorに使われている関数をあらかた実装する。
+> クラスがvectorに似た挙動をするならvectorに使われている関数をあらかた実装する。<br>
 > 標準ライブラリのリファレンスは[こちら](https://cpprefjp.github.io/reference.html)
-
-</details>
-
----
-
-<a id="gitコマンド一覧"></a>
-<details>
-<summary><span style="font-size:1.5em; font-weight:bold;">gitコマンド一覧</span></summary>
-
----
-
 
 </details>
 
@@ -252,8 +241,52 @@ class MyClass{
 <a id="gitの使い方"></a>
 <details>
 <summary><span style="font-size:1.5em; font-weight:bold;">gitの使い方</span></summary>
+gitの操作は基本ターミナルで行う。commitなどはvscodeのguiで行ったほうがいい<br>
+commitしてない状態でブランチを変えることはできない。<br>
+複数の人が同じブランチを編集している状態は避ける。<br>
+マージしたあとはブランチを削除する。（ブランチの履歴は消えない）<br>
+stashするときはすべてのファイルを保存する。<br>
+stashはいくつも作れるが、基本一つにする。
 
 ---
+> ### gitコマンド一覧
+> 共同開発で使うものだけを一覧にしたため、他のコマンドは使わないと思う。<br>
+> より多くのgitコマンドは[こちら](https://zenn.dev/zmb/articles/054ba4189244a5) 
+>
+> | コマンド | 効果 |
+> | --- | --- |
+> | git status | 現在の状態を表示 |
+> | git add (ファイル名) | (ファイル名)をステージングする |
+> | git add . | すべてのファイルをステージングする |
+> | git commit | コミットする（vscodeのguiでやったほうがいい）|
+> | git push | 現在のブランチのローカルの変更内容をリモートに送信 |
+> | git pull | 現在のブランチのリモートの変更内容をローカルに取り込む |
+> |  |  |
+> |  |  |
+> | git branch | ブランチの一覧を表示 |
+> | git checkout (ブランチ名) | (ブランチ名)に切り替え |
+> | git checkout (コミット値) | (コミット値)に切り替え |
+> | git checkout -b (ブランチ名) | (ブランチ名)のブランチを作成 |
+> | git stash | 編集した内容を退避 |
+> | git stash list | stashの一覧を表示（stashの番号はこれで確認）|
+> | git stash show stash@{(番号)} | (番号)番目のstashを詳細表示 |
+> | git stash save (コメント) | stashに(コメント)をつけてstashする |
+> | git stash pop | 編集した内容を呼び出す |
+> | git stash pop stash@{(番号)} | (番号)番目のstashでpopする |
+> | git stash drop stash@{(番号)} | (番号)番目のstashを削除 |
+> |  |  |
+> |  |  |
+> |  |  |
+> |  |  |
+> |  |  |
+> | git restore (ファイル名) | (ファイル名)で編集した内容を破棄（超危険） |
+> | git restore . | すべてのファイルで編集した内容を破棄（超危険） |
+> |  |  |
+> |  |  |
+> |  |  |
+> |  |  |
+> |  |  |
+
 
 
 </details>
