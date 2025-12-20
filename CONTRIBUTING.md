@@ -243,6 +243,7 @@ class MyClass{
 <summary><span style="font-size:1.5em; font-weight:bold;">gitの使い方</span></summary>
 gitの操作は基本ターミナルで行う。commitなどはvscodeのguiで行ったほうがいい<br>
 commitしてない状態でブランチを変えることはできない。<br>
+commitメッセージは日本語で分かりやすく書く<br>
 複数の人が同じブランチを編集している状態は避ける。<br>
 マージしたあとはブランチを削除する。（ブランチの履歴は消えない）<br>
 stashするときはすべてのファイルを保存する。<br>
