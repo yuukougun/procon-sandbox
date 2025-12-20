@@ -293,3 +293,5 @@ stashはいくつも作れるが、基本一つにする。
 </details>
 
 ---
+
+git add test comment
