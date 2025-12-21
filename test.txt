@@ -3,3 +3,9 @@ mainの更新2
 
 debug処理
 debug処理2
+mainの更新
+
+inputデータを読み込む処理
+inputデータを読み込む処理2
+debug処理
+debug処理2
