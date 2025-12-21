@@ -249,9 +249,8 @@ class MyClass{
 <a id="gitの使い方"></a>
 <details>
 <summary><span style="font-size:1.5em; font-weight:bold;">gitの使い方</span></summary>
-gitの操作は基本ターミナルで行う。commitなどはvscodeのguiで行ったほうがいい<br>
 commitしてない状態でブランチを変えることはできない。<br>
-commitメッセージは日本語で分かりやすく書く<br>
+commitメッセージは日本語で分かりやすく書く。（長くてもいい）<br>
 複数の人が同じブランチを編集している状態は避ける。<br>
 マージしたあとはブランチを削除する。（ブランチの履歴は消えない）<br>
 stashするときはすべてのファイルを保存する。<br>
@@ -268,7 +267,9 @@ mergeはせずにpull requestを送る。ymlが自動判定するから成功し
 > | git status | 現在の状態を表示 |
 > | git add (ファイル名) | (ファイル名)をステージングする |
 > | git add . | すべてのファイルをステージングする |
-> | git commit | コミットする（vscodeのguiでやったほうがいい）|
+> | git commit -m (コミットメッセージ) | ステージングファイルをコミットする |
+> | git commit --amend -m (コミットメッセージ) | 直前のコミットメッセージを変更 |
+> | git merge (ブランチ名) | (ブランチ名)を現在のブランチにマージ（mainにはpull requestする）|
 > | | |
 > | git push | 現在のブランチのローカルの変更内容をリモートに送信 |
 > | git push origin (ブランチ名) | (ブランチ名)のローカルの変更内容をリモートに送信 |
@@ -277,6 +278,8 @@ mergeはせずにpull requestを送る。ymlが自動判定するから成功し
 > | git pull --rebase | 自分のcommitを他人のcommitの後に変える |
 > |  |  |
 > | git branch | ブランチの一覧を表示 |
+> | git branch -d (ブランチ名) | (ブランチ名)を削除 |
+> | git branch -D (ブランチ名) | マージしてない(ブランチ名)を削除（超危険）|
 > | git checkout (ブランチ名) | (ブランチ名)に切り替え |
 > | git checkout (コミット値) | (コミット値)に切り替え |
 > | git checkout -b (ブランチ名) | (ブランチ名)のブランチを作成 |
@@ -289,7 +292,8 @@ mergeはせずにpull requestを送る。ymlが自動判定するから成功し
 > | git stash pop stash@{(番号)} | (番号)番目のstashでpopする |
 > | git stash drop stash@{(番号)} | (番号)番目のstashを削除 |
 > |  |  |
-> |  |  |
+> | git cherry-pick (コミット値) | (コミット値)を取り込む |
+> | git cherry-pick -m 1 (マージコミット値) | マージしたブランチを取り込む |
 > |  |  |
 > |  |  |
 > |  |  |
@@ -298,6 +302,7 @@ mergeはせずにpull requestを送る。ymlが自動判定するから成功し
 > |  |  |
 > |  |  |
 > | git reflog | git操作の状態履歴を表示 |
+> | git reset --soft HEAD~(個数) | 直近(個数)個のコミットをステージング状態に戻す（危険） |
 > | git reset --hard HEAD@{(番号)} | リポジトリを(番号)番目の状態に戻す（超危険） |
 > |  |  |
 
