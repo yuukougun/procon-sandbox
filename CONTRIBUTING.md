@@ -22,6 +22,7 @@
 repository
 ├── .github
 │   └── workflows
+|       ├── test.yml    # pull request時にtesterを実行
 │       └── doxygen.yml # ライブラリの設計仕様をpagesにデプロイ
 ├── .vscode
 │   ├── extensions.json # 推奨拡張機能のリスト
@@ -31,13 +32,15 @@ repository
 │   └── LIBRARY_DESIGN.md       # ライブラリの設計仕様 
 ├── solve               # 問題のsolveファイルのフォルダ
 │   ├── solve.cpp       # solveファイル
-│   ├── util.hpp       # soleファイルの補助ライブラリ
+│   ├── util.hpp        # soleファイルの補助ライブラリ
 │   └── parameters.hpp  # パラメータファイル
 ├── input               # inputデータのフォルダ
 ├── output              # outputデータのフォルダ
 ├── server              # サーバーやpc間の連携を行うフォルダ
 ├── visualizer          # 回答データや分析結果の可視化
-│   └─ analysis         # 回答データを分析したデータのフォルダ
+│   └── analysis        # 回答データを分析したデータのフォルダ
+├── tester              # 関数やクラスの実行テストフォルダ
+│   └── testAll.py      # すべてのテストを行うファイル
 ├── diagrams            # 設計図のフォルダ
 │   └── design.drawio   # ライブラリやワークフローの設計図
 ├── images              # Readmeに記す画像のフォルダ
@@ -101,6 +104,10 @@ repository
 > 回答データや分析データをguiで可視化する。<br>
 > run.shと被るが、solveを実行しそれぞれの入力例を入力できるようにすると便利
 
+>### `tester`フォルダ
+> コンパイルできるか、関数やクラスが適切な値を返すか、短時間で確認できるテストを試す。<br>
+> テスト方法は要検討
+
 >### `analysis`フォルダ
 > 回答データを分析し、推移や解法ごとの分析データを保存する<br>
 > 状態変化をgifとして保存するのもあり
@@ -139,6 +146,7 @@ namespace test{
 - コメントを書く。
 - 頻繁にコミットする。
 - 処理を追加するときはブランチを切る。
+- testerをちゃんと作る
 - [フォルダ構成](#フォルダ構成)に書かれたファイル名を厳守する必要はない、役割に合わせて柔軟に変更。
 
 </details>
@@ -247,7 +255,8 @@ commitメッセージは日本語で分かりやすく書く<br>
 複数の人が同じブランチを編集している状態は避ける。<br>
 マージしたあとはブランチを削除する。（ブランチの履歴は消えない）<br>
 stashするときはすべてのファイルを保存する。<br>
-stashはいくつも作れるが、基本一つにする。
+stashはいくつも作れるが、基本一つにする。<br>
+mergeはせずにpull requestを送る。ymlが自動判定するから成功したら自分でpull requestを許可する。
 
 ---
 > ### gitコマンド一覧
@@ -260,14 +269,18 @@ stashはいくつも作れるが、基本一つにする。
 > | git add (ファイル名) | (ファイル名)をステージングする |
 > | git add . | すべてのファイルをステージングする |
 > | git commit | コミットする（vscodeのguiでやったほうがいい）|
+> | | |
 > | git push | 現在のブランチのローカルの変更内容をリモートに送信 |
+> | git push origin (ブランチ名) | (ブランチ名)のローカルの変更内容をリモートに送信 |
 > | git pull | 現在のブランチのリモートの変更内容をローカルに取り込む |
-> |  |  |
+> | git pull origin (ブランチ名) | (ブランチ名)のリモートの変更内容をローカルに取り込む |
+> | git pull --rebase | 自分のcommitを他人のcommitの後に変える |
 > |  |  |
 > | git branch | ブランチの一覧を表示 |
 > | git checkout (ブランチ名) | (ブランチ名)に切り替え |
 > | git checkout (コミット値) | (コミット値)に切り替え |
 > | git checkout -b (ブランチ名) | (ブランチ名)のブランチを作成 |
+> |  |  |
 > | git stash | 編集した内容を退避 |
 > | git stash list | stashの一覧を表示（stashの番号はこれで確認）|
 > | git stash show stash@{(番号)} | (番号)番目のstashを詳細表示 |
@@ -284,8 +297,8 @@ stashはいくつも作れるが、基本一つにする。
 > | git restore . | すべてのファイルで編集した内容を破棄（超危険） |
 > |  |  |
 > |  |  |
-> |  |  |
-> |  |  |
+> | git reflog | git操作の状態履歴を表示 |
+> | git reset --hard HEAD@{(番号)} | リポジトリを(番号)番目の状態に戻す（超危険） |
 > |  |  |
 
 
@@ -293,5 +306,3 @@ stashはいくつも作れるが、基本一つにする。
 </details>
 
 ---
-
-git add test comment
