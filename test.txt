@@ -1,2 +1,5 @@
 mainの更新
 mainの更新2
+
+debug処理
+debug処理2
