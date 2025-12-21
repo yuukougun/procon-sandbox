@@ -249,15 +249,16 @@ class MyClass{
 <a id="gitの使い方"></a>
 <details>
 <summary><span style="font-size:1.5em; font-weight:bold;">gitの使い方</span></summary>
-commitしてない状態でブランチを変えることはできない。<br>
+
+---
 commitメッセージは日本語で分かりやすく書く。（長くてもいい）<br>
 複数の人が同じブランチを編集している状態は避ける。<br>
 マージしたあとはブランチを削除する。（ブランチの履歴は消えない）<br>
 stashするときはすべてのファイルを保存する。<br>
 stashはいくつも作れるが、基本一つにする。<br>
-mergeはせずにpull requestを送る。ymlが自動判定するから成功したら自分でpull requestを許可する。
+mainにmergeはせずにpull requestを送る。ymlが自動判定するから成功したら自分でpull requestを許可する。<br>
+pull requestはgithubのサービスであるため、ターミナルでは実行できない。pull requestだけvscodeのuiを使う。
 
----
 > ### gitコマンド一覧
 > 共同開発で使うものだけを一覧にしたため、他のコマンドは使わないと思う。<br>
 > より多くのgitコマンドは[こちら](https://zenn.dev/zmb/articles/054ba4189244a5) 
@@ -273,6 +274,7 @@ mergeはせずにpull requestを送る。ymlが自動判定するから成功し
 > | | |
 > | git push | 現在のブランチのローカルの変更内容をリモートに送信 |
 > | git push origin (ブランチ名) | (ブランチ名)のローカルの変更内容をリモートに送信 |
+> | git push -u origin (ブランチ名) | リモートに(ブランチ名)を追加してpushする |
 > | git pull | 現在のブランチのリモートの変更内容をローカルに取り込む |
 > | git pull origin (ブランチ名) | (ブランチ名)のリモートの変更内容をローカルに取り込む |
 > | git pull --rebase | 自分のcommitを他人のcommitの後に変える |
@@ -293,7 +295,7 @@ mergeはせずにpull requestを送る。ymlが自動判定するから成功し
 > | git stash drop stash@{(番号)} | (番号)番目のstashを削除 |
 > |  |  |
 > | git cherry-pick (コミット値) | (コミット値)を取り込む |
-> | git cherry-pick -m 1 (マージコミット値) | マージしたブランチを取り込む |
+> | git cherry-pick (コミット値1)..(コミット値2) | (コミット値1)の次から(コミット値2)を順にcherry-pick |
 > |  |  |
 > |  |  |
 > |  |  |
@@ -311,5 +313,36 @@ mergeはせずにpull requestを送る。ymlが自動判定するから成功し
 </details>
 
 ---
-ギットのチェリーピックのテスト
-ギットのチェリーピックのテスト2
+
+<a id="ターミナルでgithubにログイン"></a>
+<details>
+<summary><span style="font-size:1.5em; font-weight:bold;">ターミナルでgithubにログイン</span></summary>
+
+---
+### 1. linuxターミナルで以下を実行する
+```bash
+sudo apt update
+sudo apt install gh -y
+gh auth login
+```
+
+### 2. ４つの項目を聞かれるので以下を選択
+```txt
+what account do you want to log into?
+> GitHub.com
+
+what is your preferred protocol for Git operations?
+> HTTPS
+
+Authenticate Git with your GitHub credentials?
+> y
+
+How would you like to authenticate GitHub CLI?
+> Login with a web browser
+```
+
+### 3. git pushを行えたら成功
+
+</details>
+
+---
