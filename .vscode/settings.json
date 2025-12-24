@@ -1,0 +1,8 @@
+{
+    // オートセーブ
+    "files.autoSave": "onFocusChange",
+
+    "[markdown]": {
+        "editor.wordWrap" : "off"
+    }
+}
