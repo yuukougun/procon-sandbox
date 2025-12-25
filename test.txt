@@ -1,4 +1,0 @@
-ファイルの自動保存
-git graphの基準を常にmain
-git.autofetchをall
-を.vscodeフォルダで設定する。

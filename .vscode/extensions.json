@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "ms-vscode.cpptools",
+        "mhutchie.git-graph",
+        "hediet.vscode-drawio",
+        "github.codespaces",
+        "github.vscode-pull-request-github"
+    ]
+}
