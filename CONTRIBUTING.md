@@ -12,6 +12,8 @@
 - [環境構築](#環境構築)
 - [リポジトリ設定](#リポジトリ設定)
 
+---
+
 <a id="フォルダ構成"></a>
 <details>
 <summary><span style="font-size:1.5em; font-weight:bold;">フォルダ構成</span></summary>
@@ -275,7 +277,8 @@ namespace test{
 - stashはいくつも作れるが、基本一つにする。<br>
 - pushしたコミットはrebase、resetしない。<br>
 - pushしたタグは消さない。<br>
-- mainにmergeする時はpull requestを送る。ymlが自動判定し、成功したら自分でpull requestを許可する。<br>
+- mainにmergeする時はpull requestを送る。（git mergeでマージするとfast forwardでマージするため、pull requestと挙動が変わる）<br>
+    ymlが自動判定し、成功したら自分でpull requestを許可する。<br>
 - draft pull request、issueはgithubのサービスであるため、ターミナルでは操作できない。vscodeのuiを使う。<br>
 - コマンド実行時に途中で衝突したら実行が止まるため、--continueで再開<br>
 - コマンドを途中で中断するときは、--abort
