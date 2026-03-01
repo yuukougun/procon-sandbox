@@ -20,6 +20,8 @@ RUN apt-get update \
         graphviz \
         ca-certificates \
         pkg-config \
+        openssh-client \
+        gh \
     && rm -rf /var/lib/apt/lists/*
 
 ARG USERNAME=dev
