@@ -2,11 +2,10 @@
     "servers": {
         "spec-workflow": {
             "command": "npx",
-            // "args": ["-y", "@pimzino/spec-workflow-mcp@latest", "/home/yuuki/projects/AHC058", "--auto-start-dashboard"]
             "args": [
                 "-y",
                 "@pimzino/spec-workflow-mcp@latest",
-                "/home/yuuki/projects/AHC058"
+                "/home/yuuki/projects/procon-sandbox"
             ]
         }
     }
