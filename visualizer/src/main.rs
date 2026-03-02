@@ -87,14 +87,13 @@ impl eframe::App for MyApp {
                     self.input = 0;
                 }
                 if ui.add_sized([40.0, 40.0], egui::Button::new("=")).clicked() {
-                    match self.operation.take() {
-                        Some(op) => match op {
+                    if let Some(op) = self.operation.take() {
+                        match op {
                             Operation::Add => self.stack += self.input,
                             Operation::Sub => self.stack -= self.input,
                             Operation::Mul => self.stack *= self.input,
                             Operation::Div => self.stack /= self.input,
-                        },
-                        None => self.stack = self.input,
+                        }
                     }
                     self.display = self.stack;
                     self.input = 0;
