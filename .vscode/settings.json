@@ -1,14 +1,14 @@
 {
-    // オートセーブ
-    "files.autoSave": "onFocusChange",
+    // // オートセーブ
+    // "files.autoSave": "onFocusChange",
 
-    // git graphでtagの表示
-    "git-graph.repository.showTags": true,
-    // git fetch時にすべてfetchする
-    "git.autofetch": "all",
-    "git.autofetchPeriod": 180,
+    // // git graphでtagの表示
+    // "git-graph.repository.showTags": true,
+    // // git fetch時にすべてfetchする
+    // "git.autofetch": "all",
+    // "git.autofetchPeriod": 180,
 
-    "[markdown]": {
-        "editor.wordWrap" : "off"
-    }
+    // "[markdown]": {
+    //     "editor.wordWrap" : "off"
+    // }
 }

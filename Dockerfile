@@ -22,7 +22,12 @@ RUN apt-get update \
         pkg-config \
         openssh-client \
         gh \
+        locales \
+    && locale-gen ja_JP.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
+
+ENV LANG ja_JP.UTF-8
+ENV LC_ALL ja_JP.UTF-8
 
 ARG USERNAME=dev
 ARG USER_UID=1000

@@ -2,11 +2,43 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
 	"name": "Existing Dockerfile",
+	"workspaceFolder": "/workspaces/procon-sandbox",
 	"build": {
-		// Sets the run context to one level up instead of the .devcontainer folder.
 		"context": "..",
-		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "../Dockerfile"
+	},
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools",
+				"mhutchie.git-graph",
+				"hediet.vscode-drawio",
+				"github.codespaces",
+				"github.vscode-pull-request-github"
+			],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"terminal.integrated.profiles.linux": {
+					"bash": {
+						"path": "/bin/bash"
+					}
+				},
+				
+				// オートセーブ
+				"files.autoSave": "onFocusChange",
+
+				// git graphでtagの表示
+				"git-graph.repository.showTags": true,
+				// git fetch時にすべてfetchする
+				"git.autofetch": "all",
+				"git.autofetchPeriod": 180,
+
+				"[markdown]": {
+					"editor.wordWrap" : "off"
+				}
+			}
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
