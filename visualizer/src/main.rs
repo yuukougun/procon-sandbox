@@ -11,17 +11,18 @@ fn main() -> eframe::Result {
     )
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct MyApp {
     // ユーザーに表示される値
-    display: i32,
+    display: i64,
     // 入力値
-    input: i32,
+    input: i64,
     //　値の合計
-    stack: i32,
+    stack: i64,
     operation: Option<Operation>,
 }
 
+#[derive(Debug)]
 enum Operation {
     Add,
     Sub,
@@ -31,6 +32,7 @@ enum Operation {
 
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
+        println!("{:?}", self);
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.label(egui::RichText::new(format!("{}", self.display)).size(40.0));
             egui::Grid::new("keyboard").show(ui, |ui| {
@@ -52,9 +54,11 @@ impl eframe::App for MyApp {
                     .add_sized([40.0, 40.0], egui::Button::new("AC"))
                     .clicked()
                 {
+                    // リセット
                     *self = Self::default();
                 }
                 ui.end_row();
+                
                 add_num_button!(4);
                 add_num_button!(5);
                 add_num_button!(6);
@@ -62,6 +66,7 @@ impl eframe::App for MyApp {
                     todo!()
                 }
                 ui.end_row();
+                
                 add_num_button!(1);
                 add_num_button!(2);
                 add_num_button!(3);
@@ -69,6 +74,7 @@ impl eframe::App for MyApp {
                     todo!()
                 }
                 ui.end_row();
+                
                 add_num_button!(0);
                 if ui.add_sized([40.0, 40.0], egui::Button::new("-")).clicked() {
                     todo!()
@@ -81,7 +87,7 @@ impl eframe::App for MyApp {
                             Operation::Mul => self.stack *= self.input,
                             Operation::Div => self.stack /= self.input,
                         },
-                        None => self.stack = self.input,
+                        None => self.stack = self.display,
                     }
                     self.display = self.stack;
                     self.input = 0;
@@ -94,6 +100,8 @@ impl eframe::App for MyApp {
                             Operation::Mul => self.stack *= self.input,
                             Operation::Div => self.stack /= self.input,
                         }
+                    } else {
+                        self.stack = self.display;
                     }
                     self.display = self.stack;
                     self.input = 0;
