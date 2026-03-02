@@ -5,7 +5,7 @@
             "args": [
                 "-y",
                 "@pimzino/spec-workflow-mcp@latest",
-                "/home/yuuki/projects/procon-sandbox"
+                "/workspaces/procon-sandbox"
             ]
         }
     }

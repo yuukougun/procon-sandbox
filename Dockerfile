@@ -23,6 +23,10 @@ RUN apt-get update \
         openssh-client \
         gh \
         locales \
+        curl \
+        gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
     && locale-gen ja_JP.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
