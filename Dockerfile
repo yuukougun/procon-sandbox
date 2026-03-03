@@ -1,5 +1,6 @@
-# ベースOS
-FROM ubuntu:22.04
+# ベースOS（デフォルトは汎用 Ubuntu。GPU を使いたい場合は build-arg BASE_IMAGE を CUDA イメージに差し替える）
+ARG BASE_IMAGE=ubuntu:22.04
+FROM ${BASE_IMAGE}
 
 # aptを非対話化
 ENV DEBIAN_FRONTEND=noninteractive
@@ -25,6 +26,25 @@ RUN apt-get update \
         locales \
         curl \
         gnupg \
+        xauth \
+        x11-xserver-utils \
+        libx11-6 \
+        libxcb1 \
+        libxrandr2 \
+        libxi6 \
+        libxinerama1 \
+        libxcursor1 \
+        libxxf86vm1 \
+        libxkbcommon0 \
+        libxkbcommon-x11-0 \
+        libwayland-client0 \
+        libwayland-egl1 \
+        libegl1 \
+        libglx0 \
+        libgl1 \
+        libasound2 \
+        libfontconfig1 \
+        libgtk-3-0 \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && locale-gen ja_JP.UTF-8 \
@@ -42,6 +62,14 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} \
     && mkdir -p /etc/sudoers.d \
     && echo "%sudo ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/00-sudo-nopasswd \
     && chmod 440 /etc/sudoers.d/00-sudo-nopasswd
+
+ENV CARGO_HOME=/home/${USERNAME}/.cargo
+ENV RUSTUP_HOME=/home/${USERNAME}/.rustup
+ENV PATH="${CARGO_HOME}/bin:${PATH}"
+
+RUN su ${USERNAME} -c "curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable" \
+    && su ${USERNAME} -c "${CARGO_HOME}/bin/rustup component add rustfmt clippy" \
+    && chown -R ${USERNAME}:${USERNAME} ${CARGO_HOME} ${RUSTUP_HOME}
 
 USER ${USERNAME}
 WORKDIR /workspaces/procon-sandbox
