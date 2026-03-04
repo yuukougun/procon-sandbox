@@ -22,8 +22,8 @@
 				"ms-vscode.cpptools",
 				"mhutchie.git-graph",
 				"hediet.vscode-drawio",
-				"github.codespaces",
-				"github.vscode-pull-request-github",
+				"GitHub.codespaces",
+				"GitHub.vscode-pull-request-github",
 				"rust-lang.rust-analyzer"
 			],
 			"settings": {
@@ -83,7 +83,7 @@
 
 	"remoteUser": "dev",
 
-	"postStartCommand": "bash -lc 'mkdir -p /tmp/xdg-runtime && chmod 700 /tmp/xdg-runtime'",
+	// "postStartCommand": "bash -lc 'mkdir -p /tmp/xdg-runtime && chmod 700 /tmp/xdg-runtime'",
 
 	// After container creation, ensure rustup/cargo are available and default toolchain is set.
 	"postCreateCommand": "bash -lc \"if ! command -v rustc >/dev/null 2>&1; then curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; fi && source $HOME/.cargo/env && rustup default stable && rustup component add rustfmt clippy && cargo --version\""

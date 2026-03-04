@@ -61,7 +61,10 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} \
     && usermod -aG sudo ${USERNAME} \
     && mkdir -p /etc/sudoers.d \
     && echo "%sudo ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/00-sudo-nopasswd \
-    && chmod 440 /etc/sudoers.d/00-sudo-nopasswd
+    && chmod 440 /etc/sudoers.d/00-sudo-nopasswd \
+    && mkdir -p /tmp/xdg-runtime \
+    && chown ${USERNAME}:${USERNAME} /tmp/xdg-runtime \
+    && chmod 700 /tmp/xdg-runtime
 
 ENV CARGO_HOME=/home/${USERNAME}/.cargo
 ENV RUSTUP_HOME=/home/${USERNAME}/.rustup
