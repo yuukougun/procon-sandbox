@@ -1,6 +1,11 @@
 {
+  // Dev Container 名と、コンテナ内で開くワークスペースのパス。
+  // VS Code が起動後にどこをルートとして扱うかを固定する。
   "name": "procon-sandbox",
   "workspaceFolder": "/workspaces/procon-sandbox",
+
+  // ルートの Dockerfile を使って開発コンテナをビルドする。
+  // args は Dockerfile 側の ARG と対応し、ベースイメージやユーザーを揃えるために必要。
   "build": {
     "context": "..",
     "dockerfile": "../Dockerfile",
@@ -11,6 +16,11 @@
       "USER_GID": "1000"
     }
   },
+
+  // GUI/GPU を使うための docker run オプション。
+  // - GPU を公開
+  // - X11 ソケットと Xauthority を読み取り専用で共有
+  // - WSLg の共有ライブラリを参照
   "runArgs": [
     "--gpus",   "all",
     "--device", "/dev/dxg",
@@ -22,15 +32,26 @@
     "--volume", "${localEnv:HOME}/.Xauthority:/home/dev/.Xauthority:ro",
     "--mount",  "type=bind,src=/usr/lib/wsl/lib,dst=/usr/lib/wsl/lib,ro"
   ],
+
+  // コンテナ内の実行環境を固定する。
+  // Wayland は無効化し、winit を X11 バックエンドで動かす。
   "containerEnv": {
     "WAYLAND_DISPLAY": "",
     "WINIT_UNIX_BACKEND": "x11",
     "XDG_RUNTIME_DIR": "/tmp/xdg-runtime"
   },
+
+  // root ではなく通常ユーザーで開発する（権限事故の防止）。
   "remoteUser": "dev",
+
+  // 初回作成時に Rust ツールチェーンを用意する。
+  // 既に入っている場合はスキップするため、再作成時も安全。
   "postCreateCommand": "bash -lc \"if ! command -v rustc >/dev/null 2>&1; then curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; fi && source $HOME/.cargo/env && rustup default stable && rustup component add rustfmt clippy && cargo --version\"",
+
+  // VS Code 側の開発体験を揃える（拡張機能・エディタ設定）。
   "customizations": {
     "vscode": {
+      // 拡張機能の追加
       "extensions": [
         "ms-vscode.cpptools",
         "mhutchie.git-graph",
@@ -39,19 +60,24 @@
         "GitHub.vscode-pull-request-github",
         "rust-lang.rust-analyzer"
       ],
+
       "settings": {
+        // ターミナルは bash を使う。
 				"terminal.integrated.defaultProfile.linux": "bash",
 				"terminal.integrated.profiles.linux": {
 					"bash": {
 						"path": "/bin/bash"
 					}
 				},
+
+        // 編集時の運用設定。
         "files.autoSave": "onFocusChange",
         "git-graph.repository.showTags": true,
         "git.autofetch": "all",
         "git.autofetchPeriod": 180,
+        
+        // VS Code ターミナル実行でも Wayland を無効化し X11 を使う。
 				"terminal.integrated.env.linux": {
-					// "PATH": "/home/dev/.cargo/bin:${env:PATH}",
 					"WAYLAND_DISPLAY": "",
 					"WINIT_UNIX_BACKEND": "x11"
 				},
