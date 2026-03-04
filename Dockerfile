@@ -5,9 +5,8 @@ FROM ${BASE_IMAGE}
 # apt の対話プロンプトを抑止してビルドを安定化。
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 開発に必要な基本ツール、GUI 実行に必要なランタイムを導入。
+# 開発に必要な基本ツールを導入。
 # c++、python、Node.js、rustを導入
-# visualizer をコンテナ内で表示するために X11/Wayland 関連ライブラリを含める。
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
@@ -28,24 +27,6 @@ RUN apt-get update \
         locales \
         curl \
         gnupg \
-        xauth \
-        libx11-6 \
-        libxcb1 \
-        libxrandr2 \
-        libxi6 \
-        libxinerama1 \
-        libxcursor1 \
-        libxxf86vm1 \
-        libxkbcommon0 \
-        libxkbcommon-x11-0 \
-        libwayland-client0 \
-        libwayland-egl1 \
-        libegl1 \
-        libglx0 \
-        libgl1 \
-        libasound2 \
-        libfontconfig1 \
-        libgtk-3-0 \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && locale-gen ja_JP.UTF-8 \
@@ -60,16 +41,13 @@ ARG USERNAME=dev
 ARG USER_UID=1000
 ARG USER_GID=1000
 
-# 開発用ユーザーを作成し、sudo 権限と XDG ランタイムディレクトリを準備。
+# 開発用ユーザーを作成し、sudo 権限を準備。
 RUN groupadd --gid ${USER_GID} ${USERNAME} \
     && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} \
     && usermod -aG sudo ${USERNAME} \
     && mkdir -p /etc/sudoers.d \
     && echo "%sudo ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/00-sudo-nopasswd \
-    && chmod 440 /etc/sudoers.d/00-sudo-nopasswd \
-    && mkdir -p /tmp/xdg-runtime \
-    && chown ${USERNAME}:${USERNAME} /tmp/xdg-runtime \
-    && chmod 700 /tmp/xdg-runtime
+    && chmod 440 /etc/sudoers.d/00-sudo-nopasswd
 
 # Rust ツールチェーンの保存先を明示し、PATH に追加。
 ENV CARGO_HOME=/home/${USERNAME}/.cargo
