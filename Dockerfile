@@ -1,11 +1,8 @@
-# ベースOS（デフォルトは汎用 Ubuntu。GPU を使いたい場合は build-arg BASE_IMAGE を CUDA イメージに差し替える）
 ARG BASE_IMAGE=ubuntu:22.04
 FROM ${BASE_IMAGE}
 
-# aptを非対話化
 ENV DEBIAN_FRONTEND=noninteractive
 
-# パッケージリスト更新
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
@@ -27,7 +24,6 @@ RUN apt-get update \
         curl \
         gnupg \
         xauth \
-        x11-xserver-utils \
         libx11-6 \
         libxcb1 \
         libxrandr2 \
@@ -50,12 +46,13 @@ RUN apt-get update \
     && locale-gen ja_JP.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
-ENV LANG ja_JP.UTF-8
-ENV LC_ALL ja_JP.UTF-8
+ENV LANG=ja_JP.UTF-8
+ENV LC_ALL=ja_JP.UTF-8
 
 ARG USERNAME=dev
 ARG USER_UID=1000
 ARG USER_GID=1000
+
 RUN groupadd --gid ${USER_GID} ${USERNAME} \
     && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} \
     && usermod -aG sudo ${USERNAME} \
@@ -68,7 +65,7 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} \
 
 ENV CARGO_HOME=/home/${USERNAME}/.cargo
 ENV RUSTUP_HOME=/home/${USERNAME}/.rustup
-ENV PATH="${CARGO_HOME}/bin:${PATH}"
+ENV PATH=${CARGO_HOME}/bin:${PATH}
 
 RUN su ${USERNAME} -c "curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable" \
     && su ${USERNAME} -c "${CARGO_HOME}/bin/rustup component add rustfmt clippy" \
@@ -76,7 +73,5 @@ RUN su ${USERNAME} -c "curl -sSf https://sh.rustup.rs | sh -s -- -y --default-to
 
 USER ${USERNAME}
 WORKDIR /workspaces/procon-sandbox
-
 SHELL ["/bin/bash", "-c"]
-
 CMD ["bash"]

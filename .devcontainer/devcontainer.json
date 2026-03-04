@@ -1,102 +1,64 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
-	"name": "Existing Dockerfile",
-	"workspaceFolder": "/workspaces/procon-sandbox",
-	"build": {
-		"context": "..",
-		"dockerfile": "../Dockerfile",
-		"args": {
-			// "BASE_IMAGE": "ubuntu:22.04"
-			"BASE_IMAGE": "nvidia/cuda:12.6.0-devel-ubuntu22.04",
-			"USERNAME": "dev",
-			"USER_UID": "1000",
-			"USER_GID": "1000"
-
-		}
-	},
-
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"ms-vscode.cpptools",
-				"mhutchie.git-graph",
-				"hediet.vscode-drawio",
-				"GitHub.codespaces",
-				"GitHub.vscode-pull-request-github",
-				"rust-lang.rust-analyzer"
-			],
-			"settings": {
+  "name": "procon-sandbox",
+  "workspaceFolder": "/workspaces/procon-sandbox",
+  "build": {
+    "context": "..",
+    "dockerfile": "../Dockerfile",
+    "args": {
+      "BASE_IMAGE": "nvidia/cuda:12.6.0-devel-ubuntu22.04",
+      "USERNAME": "dev",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+  "runArgs": [
+    "--gpus",   "all",
+    "--device", "/dev/dxg",
+    "--env",    "DISPLAY=${localEnv:DISPLAY}",
+    "--env",    "XAUTHORITY=/home/dev/.Xauthority",
+    "--env",    "NVIDIA_VISIBLE_DEVICES=all",
+    "--env",    "NVIDIA_DRIVER_CAPABILITIES=compute,graphics,utility",
+    "--volume", "/tmp/.X11-unix:/tmp/.X11-unix:ro",
+    "--volume", "${localEnv:HOME}/.Xauthority:/home/dev/.Xauthority:ro",
+    "--mount",  "type=bind,src=/usr/lib/wsl/lib,dst=/usr/lib/wsl/lib,ro"
+  ],
+  "containerEnv": {
+    "WAYLAND_DISPLAY": "",
+    "WINIT_UNIX_BACKEND": "x11",
+    "XDG_RUNTIME_DIR": "/tmp/xdg-runtime"
+  },
+  "remoteUser": "dev",
+  "postCreateCommand": "bash -lc \"if ! command -v rustc >/dev/null 2>&1; then curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; fi && source $HOME/.cargo/env && rustup default stable && rustup component add rustfmt clippy && cargo --version\"",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "mhutchie.git-graph",
+        "hediet.vscode-drawio",
+        "GitHub.codespaces",
+        "GitHub.vscode-pull-request-github",
+        "rust-lang.rust-analyzer"
+      ],
+      "settings": {
 				"terminal.integrated.defaultProfile.linux": "bash",
 				"terminal.integrated.profiles.linux": {
 					"bash": {
 						"path": "/bin/bash"
 					}
 				},
-				
-				// オートセーブ
-				"files.autoSave": "onFocusChange",
-
-				// git graphでtagの表示
-				"git-graph.repository.showTags": true,
-				// git fetch時にすべてfetchする
-				"git.autofetch": "all",
-				"git.autofetchPeriod": 180,
-
+        "files.autoSave": "onFocusChange",
+        "git-graph.repository.showTags": true,
+        "git.autofetch": "all",
+        "git.autofetchPeriod": 180,
 				"terminal.integrated.env.linux": {
-					"PATH": "/home/dev/.cargo/bin:${env:PATH}",
+					// "PATH": "/home/dev/.cargo/bin:${env:PATH}",
 					"WAYLAND_DISPLAY": "",
 					"WINIT_UNIX_BACKEND": "x11"
 				},
-
-				"[markdown]": {
-					"editor.wordWrap" : "off"
-				}
-			}
-		}
-	},
-
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// Pass host X11 display into the container with Xauthority-based auth.
-	"runArgs": [
-		"--gpus", "all",
-		"--device", "/dev/dxg",
-		"--env", "DISPLAY=${localEnv:DISPLAY}",
-		"--env", "WAYLAND_DISPLAY=",
-		"--env", "XAUTHORITY=/home/dev/.Xauthority",
-		"--env", "NVIDIA_VISIBLE_DEVICES=all",
-		"--env", "NVIDIA_DRIVER_CAPABILITIES=compute,graphics,utility",
-		"--volume", "/tmp/.X11-unix:/tmp/.X11-unix:ro",
-		"--volume", "${localEnv:HOME}/.Xauthority:/home/dev/.Xauthority:ro",
-		"--mount", "type=bind,src=/usr/lib/wsl/lib,dst=/usr/lib/wsl/lib,ro"
-	],
-
-	"containerEnv": {
-		"DISPLAY": "${localEnv:DISPLAY}",
-		"WAYLAND_DISPLAY": "",
-		"WINIT_UNIX_BACKEND": "x11",
-		"XDG_RUNTIME_DIR": "/tmp/xdg-runtime",
-		"XAUTHORITY": "/home/dev/.Xauthority",
-		"NVIDIA_VISIBLE_DEVICES": "all",
-		"NVIDIA_DRIVER_CAPABILITIES": "compute,graphics,utility"
-	},
-
-	"remoteUser": "dev",
-
-	// "postStartCommand": "bash -lc 'mkdir -p /tmp/xdg-runtime && chmod 700 /tmp/xdg-runtime'",
-
-	// After container creation, ensure rustup/cargo are available and default toolchain is set.
-	"postCreateCommand": "bash -lc \"if ! command -v rustc >/dev/null 2>&1; then curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; fi && source $HOME/.cargo/env && rustup default stable && rustup component add rustfmt clippy && cargo --version\""
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-
-	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "cat /etc/os-release",
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "devcontainer"
+        "[markdown]": {
+          "editor.wordWrap": "off"
+        }
+      }
+    }
+  }
 }
