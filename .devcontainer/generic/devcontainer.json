@@ -14,6 +14,9 @@
   // root ではなく通常ユーザーで開発する（権限事故の防止）。
   "remoteUser": "dev",
 
+  // ワークスペースがマウントされた後に CreateCommand を実行
+  "postCreateCommand": "if [ -f /workspaces/procon-sandbox/.devcontainer/CreateCommand ]; then bash /workspaces/procon-sandbox/.devcontainer/CreateCommand; fi",
+
   // VS Code 側の開発体験を揃える（拡張機能・エディタ設定）。
   "customizations": {
     "vscode": {
