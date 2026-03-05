@@ -1,5 +1,39 @@
 #!/bin/bash
 
-if git diff --cached --name-only | grep "^docs/" > /dev/null; then
-    echo "CONTRIBUTING.mdの生成"
-fi
+# if git diff --cached --name-only | grep "^docs/" > /dev/null; then
+#     echo "CONTRIBUTING.mdの生成"
+#     echo commit >> docs/test.txt
+#     git add docs/test.txt
+# fi
+
+awk -F'[()]' '/-/ {print $2}' docs/navigation.md | while read file
+do
+    navi_tmp=$(mktemp)
+    trap 'rm -f "$navi_tmp"' EXIT
+
+    cat docs/navigation.md > "$navi_tmp"
+    sed -i "/${file:2}/s/$/ - now/" "$navi_tmp"
+    echo -e "\n---" >> "$navi_tmp"
+
+    docs_tmp=$(mktemp)
+    trap 'rm -f "$docs_tmp"' EXIT
+    awk -v nav="$navi_tmp" '
+    /BEGIN-NAVIGATION/ {
+        print
+
+        system("cat " nav)
+
+        skip=1
+        next
+    }
+
+    /END-NAVIGATION/ {
+        skip=0
+    }
+
+    !skip
+    ' "docs/${file:2}" > "$docs_tmp"
+
+    mv "$docs_tmp" "docs/${file:2}"
+
+done
