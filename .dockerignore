@@ -1,0 +1,10 @@
+# VCS metadata
+.git
+
+# Build artifacts and local bins
+**/target/
+**/bin/
+ 
+# Logs and workflow metadata
+audit.log
+.spec-workflow
