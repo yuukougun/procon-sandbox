@@ -55,7 +55,9 @@
 
         "[markdown]": {
           "editor.wordWrap": "off"
-        }
+        },
+        "markdown.preview.scrollEditorWithPreview": false,
+        "markdown.preview.scrollPreviewWithEditor": false
       }
     }
   }
