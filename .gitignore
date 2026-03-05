@@ -1,3 +1,6 @@
 memo*
-\audit.log
+*.log
 .spec-workflow
+
+**/target/
+**/bin/
