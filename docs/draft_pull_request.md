@@ -7,13 +7,13 @@
 - [gitの使い方](./git_usage.md)
 - [開発フロー](./development_flow.md)
 - [githubの使い方](./github_usage.md)
-- [draft-pull-requestの方法](./draft_pull_request.md) - now
+- [Draft-Pull-Requestの方法](./draft_pull_request.md) - now
 - [issueの使い方](./issue_usage.md)
 - [環境構築](./environment_setup.md)
 - [リポジトリ設定](./repo_settings.md)
 - [Dockerの使い方](./docker_usage.md)
 
-## draft-pull-requestの方法
+## Draft-Pull-Requestの方法
 <!-- END-NAVIGATION -->
 
 ブランチを分け開発が終わってからpull requestを送る方法ではなく、
