@@ -62,6 +62,6 @@ EOF
 
     mv "$contribut_tmp" CONTRIBUTING.md
 
-    # git add docs/*.md
-    # git add CONTRIBUTING.md
+    git add docs/*.md
+    git add CONTRIBUTING.md
 fi

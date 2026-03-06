@@ -1,3 +1,4 @@
+<!-- BEGIN-NAVIGATION -->
 # 目次
 - [フォルダ構成](./directory_structure.md)
 - [基本的なクラス設計](./class_design.md)
@@ -7,7 +8,10 @@
 - [開発フロー](./development_flow.md)
 - [githubの使い方](./github_usage.md)
 - [draft-pull-requestの方法](./draft_pull_request.md)
-- [issueの使い方](./issue_usage.md)
+- [issueの使い方](./issue_usage.md) - now
 - [環境構築](./environment_setup.md)
 - [リポジトリ設定](./repo_settings.md)
 - [Dockerの使い方](./docker_usage.md)
+
+## issueの使い方
+<!-- END-NAVIGATION -->

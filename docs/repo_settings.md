@@ -1,3 +1,4 @@
+<!-- BEGIN-NAVIGATION -->
 # 目次
 - [フォルダ構成](./directory_structure.md)
 - [基本的なクラス設計](./class_design.md)
@@ -9,5 +10,8 @@
 - [draft-pull-requestの方法](./draft_pull_request.md)
 - [issueの使い方](./issue_usage.md)
 - [環境構築](./environment_setup.md)
-- [リポジトリ設定](./repo_settings.md)
+- [リポジトリ設定](./repo_settings.md) - now
 - [Dockerの使い方](./docker_usage.md)
+
+## リポジトリ設定
+<!-- END-NAVIGATION -->

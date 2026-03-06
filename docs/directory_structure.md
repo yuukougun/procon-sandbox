@@ -1,19 +1,21 @@
-# フォルダ構成
-## 目次
-- [フォルダ構成](#フォルダ構成)
-- [基本的なクラス設計](#基本的なクラス設計)
-- [コーディング時の注意](#コーディング時の注意)
-- [名前の定義ルール](#名前の定義ルール)
-- [gitの使い方](#gitの使い方)
-- [開発フロー](#開発フロー)
-- [githubの使い方](#githubの使い方)
-- [draft-pull-requestの方法](#draft-pull-requestの方法)
-- [issueの使い方](#issueの使い方)
-- [環境構築](#環境構築)
-- [リポジトリ設定](#リポジトリ設定)
-- [Dockerの使い方](#Dockerの使い方)
+<!-- BEGIN-NAVIGATION -->
+# 目次
+- [フォルダ構成](./directory_structure.md) - now
+- [基本的なクラス設計](./class_design.md)
+- [コーディング時の注意](./coding_guidelines.md)
+- [名前の定義ルール](./naming_rules.md)
+- [gitの使い方](./git_usage.md)
+- [開発フロー](./development_flow.md)
+- [githubの使い方](./github_usage.md)
+- [draft-pull-requestの方法](./draft_pull_request.md)
+- [issueの使い方](./issue_usage.md)
+- [環境構築](./environment_setup.md)
+- [リポジトリ設定](./repo_settings.md)
+- [Dockerの使い方](./docker_usage.md)
 
----
+## フォルダ構成
+<!-- END-NAVIGATION -->
+
 ```
 REPOSITORY
 ├── .github
