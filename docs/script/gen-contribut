@@ -1,3 +1,6 @@
+# リポジトリのパス
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
 # contributing.md の tmpファイル
 contribut_tmp=$(mktemp)
 trap 'rm -f "$contribut_tmp"' EXIT
@@ -12,14 +15,14 @@ do
     # ドキュメントの名前とファイルパスの取得
     IFS=: read -r doc_name doc_path <<< "$file"
     doc_name=${doc_name:3:${#doc_name}-4}
-    doc_path=${doc_path:2}
+    doc_path="${REPO_ROOT}${doc_path}"
 
     # _navigation.md の tmpファイル
     nav_tmp=$(mktemp)
     trap 'rm -f "$nav_tmp"' EXIT
 
     cat docs/_navigation.md > "$nav_tmp"
-    sed -i "/$doc_path/s/$/ - now/" "$nav_tmp"
+    sed -i "/$doc_name/s/$/ - now/" "$nav_tmp"
     echo -e "\n## $doc_name" >> "$nav_tmp"
 
     # 各ドキュメントに目次を追加
@@ -40,9 +43,9 @@ do
     }
 
     !skip
-    ' "docs/$doc_path" > "$doc_tmp"
+    ' "$doc_path" > "$doc_tmp"
 
-    mv "$doc_tmp" "docs/$doc_path"
+    mv "$doc_tmp" "$doc_path"
 
     # contributing.mdに追記
     echo "" >> "$contribut_tmp"
@@ -54,7 +57,7 @@ do
 ---
 EOF
 
-    sed -n '/END-NAVIGATION/,$p' docs/$doc_path | sed '1d' >> $contribut_tmp
+    sed -n '/END-NAVIGATION/,$p' $doc_path | sed '1d' >> $contribut_tmp
 
     cat << EOF >> "$contribut_tmp"
 </details>
