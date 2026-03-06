@@ -1,0 +1,67 @@
+# contributing.md の tmpファイル
+contribut_tmp=$(mktemp)
+trap 'rm -f "$contribut_tmp"' EXIT
+
+echo "<!-- このファイルは自動生成されるものです。書き換えても内容は破棄されます。-->" > "$contribut_tmp"
+echo -e "# proconでのリポジトリの使い方\n" >> "$contribut_tmp"
+cat docs/_navigation.md >> "$contribut_tmp"
+
+# 目次の上から順にcontributing.mdに書き込み
+awk -F'[()]' '/-/ {print $1 ":" $2}' docs/_navigation.md | while read file
+do
+    # ドキュメントの名前とファイルパスの取得
+    IFS=: read -r doc_name doc_path <<< "$file"
+    doc_name=${doc_name:3:${#doc_name}-4}
+    doc_path=${doc_path:2}
+
+    # _navigation.md の tmpファイル
+    nav_tmp=$(mktemp)
+    trap 'rm -f "$nav_tmp"' EXIT
+
+    cat docs/_navigation.md > "$nav_tmp"
+    sed -i "/$doc_path/s/$/ - now/" "$nav_tmp"
+    echo -e "\n## $doc_name" >> "$nav_tmp"
+
+    # 各ドキュメントに目次を追加
+    doc_tmp=$(mktemp)
+    trap 'rm -f "$doc_tmp"' EXIT
+    awk -v nav="$nav_tmp" '
+    /BEGIN-NAVIGATION/ {
+        print
+
+        system("cat " nav)
+
+        skip=1
+        next
+    }
+
+    /END-NAVIGATION/ {
+        skip=0
+    }
+
+    !skip
+    ' "docs/$doc_path" > "$doc_tmp"
+
+    mv "$doc_tmp" "docs/$doc_path"
+
+    # contributing.mdに追記
+    echo "" >> "$contribut_tmp"
+    cat << EOF >> "$contribut_tmp"
+<a id="$doc_name"></a>
+<details>
+<summary><span style="font-size:1.5em; font-weight:bold;">$doc_name</span></summary>
+
+---
+EOF
+
+    sed -n '/END-NAVIGATION/,$p' docs/$doc_path | sed '1d' >> $contribut_tmp
+
+    cat << EOF >> "$contribut_tmp"
+</details>
+
+---
+EOF
+
+done
+
+mv "$contribut_tmp" CONTRIBUTING.md

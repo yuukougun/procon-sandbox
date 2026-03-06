@@ -3,65 +3,10 @@
 if git diff --cached --name-only | grep "^docs/" > /dev/null; then
     echo "CONTRIBUTING.mdの生成"
 
-    contribut_tmp=$(mktemp)
-    trap 'rm -f "$contribut_tmp"' EXIT
-    echo -e "# proconでのリポジトリの使い方\n" > "$contribut_tmp"
-    cat docs/navigation.md >> "$contribut_tmp"
+    # contributing.mdファイルの生成
+    bash docs/script/gen-contribut
 
-    awk -F'[()]' '/-/ {print $1 ":" $2}' docs/navigation.md | while read file
-    do
-        IFS=: read -r doc_name doc_path <<< "$file"
-        doc_name=${doc_name:3:${#doc_name}-4}
-        doc_path=${doc_path:2}
-
-        nav_tmp=$(mktemp)
-        trap 'rm -f "$nav_tmp"' EXIT
-
-        cat docs/navigation.md > "$nav_tmp"
-        sed -i "/$doc_path/s/$/ - now/" "$nav_tmp"
-        echo -e "\n## $doc_name" >> "$nav_tmp"
-
-        doc_tmp=$(mktemp)
-        trap 'rm -f "$doc_tmp"' EXIT
-        awk -v nav="$nav_tmp" '
-        /BEGIN-NAVIGATION/ {
-            print
-
-            system("cat " nav)
-
-            skip=1
-            next
-        }
-
-        /END-NAVIGATION/ {
-            skip=0
-        }
-
-        !skip
-        ' "docs/$doc_path" > "$doc_tmp"
-
-        mv "$doc_tmp" "docs/$doc_path"
-
-        echo "" >> "$contribut_tmp"
-        cat << EOF >> "$contribut_tmp"
-<a id="$doc_name"></a>
-<details>
-<summary><span style="font-size:1.5em; font-weight:bold;">$doc_name</span></summary>
-
----
-EOF
-
-        sed -n '/END-NAVIGATION/,$p' docs/$doc_path | sed '1d' >> $contribut_tmp
-
-        cat << EOF >> "$contribut_tmp"
-</details>
-
----
-EOF
-    done
-
-    mv "$contribut_tmp" CONTRIBUTING.md
-
+    # 変更をステージング
     git add docs/*.md
     git add CONTRIBUTING.md
 fi
