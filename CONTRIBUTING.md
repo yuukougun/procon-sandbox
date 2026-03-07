@@ -1,23 +1,23 @@
 <!-- このファイルは自動生成されるものです。書き換えても内容は破棄されます。-->
 # proconでのリポジトリの使い方
 
-# 目次
-- [フォルダ構成](./directory_structure.md)
-- [基本的なクラス設計](./class_design.md)
-- [コーディング時の注意](./coding_guidelines.md)
-- [名前の定義ルール](./naming_rules.md)
-- [gitの使い方](./git_usage.md)
-- [開発フロー](./development_flow.md)
-- [githubの使い方](./github_usage.md)
-- [Draft-Pull-Requestの方法](./draft_pull_request.md)
-- [issueの使い方](./issue_usage.md)
-- [環境構築](./environment_setup.md)
-- [リポジトリ設定](./repo_settings.md)
-- [Dockerの使い方](./docker_usage.md)
+# 目次 [home](/CONTRIBUTING.md)
+- [ディレクトリ構成](/docs/directory_structure.md)
+- [基本的なクラス設計](/docs/class_design.md)
+- [コーディング時の注意](/docs/coding_guidelines.md)
+- [名前の定義ルール](/docs/naming_rules.md)
+- [gitの使い方](/docs/git_usage.md)
+- [開発フロー](/docs/development_flow.md)
+- [githubの使い方](/docs/github_usage.md)
+- [Draft-Pull-Requestの方法](/docs/draft_pull_request.md)
+- [issueの使い方](/docs/issue_usage.md)
+- [環境構築](/docs/environment_setup.md)
+- [リポジトリ設定](/docs/repo_settings.md)
+- [Dockerの使い方](/docs/docker_usage.md)
 
-<a id="フォルダ構成"></a>
+<a id="ディレクトリ構成"></a>
 <details>
-<summary><span style="font-size:1.5em; font-weight:bold;">フォルダ構成</span></summary>
+<summary><span style="font-size:1.5em; font-weight:bold;">ディレクトリ構成</span></summary>
 
 ---
 
@@ -252,7 +252,9 @@ namespace test{
 
 > ### ブランチの命名規則
 > ブランチ名には'/'をつけることができる。<br>
-> ブランチ名の前にそのブランチの種類を書く（例：bugfix/library）
+> ブランチ名の前にそのブランチの種類を書く（例：bugfix/library）<br>
+> 大きなプロジェクトのブランチはmainを増設する。（例：visualizer/main）<br>
+> 例：visualizerでbuttonのバグを治すブランチは **`visualizer/bugifx/button`**
 > 
 > | 種類 | 命名規則 |
 > | --- | --- |
@@ -317,6 +319,7 @@ namespace test{
 > | git checkout (ブランチ名) | (ブランチ名)に切り替え |
 > | git checkout (コミット値) | (コミット値)に切り替え |
 > | git checkout -b (ブランチ名) | (ブランチ名)のブランチを作成 |
+> | git checkout (ブランチ名) -- (ファイル名) | (ブランチ名)から(ファイル名)をコピーしadd |
 > |  |  |
 > | git stash | 編集した内容を退避 |
 > | git stash list | stashの一覧を表示（stashの番号はこれで確認）|
@@ -546,6 +549,7 @@ mainブランチが更新されていたら再び最新のmainブランチをマ
 
 ---
 
+> ### gitの環境構築
 > ### 1. linuxターミナルで以下を実行する
 > ```bash
 > sudo apt update
@@ -569,7 +573,7 @@ mainブランチが更新されていたら再び最新のmainブランチをマ
 > ```
 > 
 > ### 3. git pushを行えたら成功
-
+>
 > ### gitの設定
 > 以下のコマンドを実行し、設定すると便利
 > 
@@ -583,6 +587,18 @@ mainブランチが更新されていたら再び最新のmainブランチをマ
 > ```
 > 
 > **`git config --global --list`**で設定一覧を表示できる。
+
+> ### dockerの環境構築
+> ### 1. Docker Desktopをインストール
+> **`Docker Desktop`** の公式サイトは[こちら](https://www.docker.com/products/docker-desktop/)<br>
+> dockerを使用する際は **`Docker Desktop`** を起動する必要がある。<br>
+> 一回起動したら閉じても大丈夫<br>
+> 
+> ### 2. vscodeの拡張機能 Dev Container をインストール
+> Dev Containerの識別子は **`ms-vscode-remote.remote-containers`** なので検索欄に入れたら出*てくる。<br>
+> vscodeなら左下の青い部分をクリックすることで **`コンテナで再度開く`** 選択肢が出てくる<br>
+> .devcontainerに複数フォルダ作られてたら自分に適した環境を選択<br>
+> コンテナの環境構築は **`Dockerfile`** 、**`devcontainer.json`** にかく
 </details>
 
 ---
@@ -601,6 +617,7 @@ mainブランチが更新されていたら再び最新のmainブランチをマ
 <summary><span style="font-size:1.5em; font-weight:bold;">Dockerの使い方</span></summary>
 
 ---
+
 </details>
 
 ---
