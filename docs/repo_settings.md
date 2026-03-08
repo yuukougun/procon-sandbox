@@ -15,3 +15,8 @@
 
 ## リポジトリ設定
 <!-- END-NAVIGATION -->
+
+マージされたプルリクエストのブランチを自動で消す
+generalのAutomatically delete head branchesにチェックを付ける
+
+procon-sandboxをtempleteリポジトリとし、参照する

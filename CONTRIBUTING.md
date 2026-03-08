@@ -608,6 +608,11 @@ mainブランチが更新されていたら再び最新のmainブランチをマ
 <summary><span style="font-size:1.5em; font-weight:bold;">リポジトリ設定</span></summary>
 
 ---
+
+マージされたプルリクエストのブランチを自動で消す
+generalのAutomatically delete head branchesにチェックを付ける
+
+procon-sandboxをtempleteリポジトリとし、参照する
 </details>
 
 ---
