@@ -54,6 +54,7 @@
         "files.autoSave": "onFocusChange",
         "git-graph.repository.showTags": true,
         "git.autofetch": "all",
+        "git.pruneOnFetch": true,
         "git.autofetchPeriod": 180,
 
         "[markdown]": {
