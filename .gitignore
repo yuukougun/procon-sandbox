@@ -1,6 +1,7 @@
 memo*
 *.log
 .spec-workflow
+wandb/
 
 **/target/
 **/bin/
