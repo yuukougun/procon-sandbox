@@ -11,6 +11,11 @@
     "dockerfile": "../../Dockerfile"
   },
 
+  // envファイルの読み込み
+  "runArgs": [
+    "--env-file", ".env"
+  ],
+
   // root ではなく通常ユーザーで開発する（権限事故の防止）。
   "remoteUser": "dev",
 

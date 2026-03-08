@@ -5,7 +5,9 @@
 **/target/
 **/bin/
  
-# Logs and workflow、wandb metadata
-audit.log
+# workflow、wandb metadata
 .spec-workflow
 wandb/
+
+*.log
+.env
