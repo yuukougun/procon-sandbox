@@ -15,7 +15,7 @@ RUN apt-get update \
         cmake \
         git \
         sudo \
-        python3 \
+        python3 python-is-python3 \
         python3-pip \
         python3-venv \
         doxygen \

@@ -35,7 +35,9 @@
       "extensions": [
         "ms-vscode.cpptools",
         "rust-lang.rust-analyzer",
-        "donjayamanne.python-extension-pack",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
         "mhutchie.git-graph",
         "GitHub.codespaces",
         "GitHub.vscode-pull-request-github",
