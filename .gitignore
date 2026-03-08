@@ -1,1 +1,6 @@
 memo*
+*.log
+.spec-workflow
+
+**/target/
+**/bin/

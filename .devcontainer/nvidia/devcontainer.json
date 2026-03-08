@@ -1,0 +1,67 @@
+{
+  // Dev Container 名と、コンテナ内で開くワークスペースのパス。
+  // VS Code が起動後にどこをルートとして扱うかを固定する。
+  "name": "procon-sandbox(nvidia)",
+  "workspaceFolder": "/workspaces/procon-sandbox",
+
+  // ルートの Dockerfile を使って開発コンテナをビルドする。
+  // args は Dockerfile 側の ARG と対応し、ベースイメージやユーザーを揃えるために必要。
+  "build": {
+    "context": "../..",
+    "dockerfile": "../../Dockerfile",
+    "args": {
+      "BASE_IMAGE": "nvidia/cuda:12.6.0-devel-ubuntu22.04"
+    }
+  },
+
+  // GUI/GPU を使うための docker run オプション。
+  // - GPU を公開（必要なら残す）
+  "runArgs": [
+    "--gpus",   "all",
+    "--env",    "NVIDIA_VISIBLE_DEVICES=all",
+    "--env",    "NVIDIA_DRIVER_CAPABILITIES=compute,graphics,utility"
+  ],
+
+  // root ではなく通常ユーザーで開発する（権限事故の防止）。
+  "remoteUser": "dev",
+
+  // ワークスペースがマウントされた後に CreateCommand を実行
+  "postCreateCommand": "if [ -f /workspaces/procon-sandbox/.devcontainer/CreateCommand ]; then bash /workspaces/procon-sandbox/.devcontainer/CreateCommand; fi",
+
+  // VS Code 側の開発体験を揃える（拡張機能・エディタ設定）。
+  "customizations": {
+    "vscode": {
+      // 拡張機能の追加
+      "extensions": [
+        "ms-vscode.cpptools",
+        "mhutchie.git-graph",
+        "hediet.vscode-drawio",
+        "GitHub.codespaces",
+        "GitHub.vscode-pull-request-github",
+        "rust-lang.rust-analyzer"
+      ],
+
+      "settings": {
+        // ターミナルは bash を使う。
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"terminal.integrated.profiles.linux": {
+					"bash": {
+						"path": "/bin/bash"
+					}
+				},
+
+        // 編集時の運用設定。
+        "files.autoSave": "onFocusChange",
+        "git-graph.repository.showTags": true,
+        "git.autofetch": "all",
+        "git.autofetchPeriod": 180,
+
+        "[markdown]": {
+          "editor.wordWrap": "off"
+        },
+        "markdown.preview.scrollEditorWithPreview": false,
+        "markdown.preview.scrollPreviewWithEditor": false
+      }
+    }
+  }
+}
