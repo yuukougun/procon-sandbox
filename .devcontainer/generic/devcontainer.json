@@ -23,11 +23,12 @@
       // 拡張機能の追加
       "extensions": [
         "ms-vscode.cpptools",
+        "rust-lang.rust-analyzer",
+        "donjayamanne.python-extension-pack",
         "mhutchie.git-graph",
-        "hediet.vscode-drawio",
         "GitHub.codespaces",
         "GitHub.vscode-pull-request-github",
-        "rust-lang.rust-analyzer"
+        "hediet.vscode-drawio"
       ],
 
       "settings": {
