@@ -61,6 +61,14 @@ RUN su ${USERNAME} -c "curl -sSf https://sh.rustup.rs | sh -s -- -y --default-to
 
 # 以降の作業は通常ユーザーで実行。
 USER ${USERNAME}
+
+# wandb を導入
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir wandb
+
+# pip のインストール先（.local/bin）を PATH に追加
+ENV PATH=/home/${USERNAME}/.local/bin:${PATH}
+
 WORKDIR /workspaces/procon-sandbox
 SHELL ["/bin/bash", "-c"]
 CMD ["bash"]
