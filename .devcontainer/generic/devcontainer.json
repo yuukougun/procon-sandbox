@@ -58,7 +58,10 @@
           "editor.wordWrap": "off"
         },
         "markdown.preview.scrollEditorWithPreview": false,
-        "markdown.preview.scrollPreviewWithEditor": false
+        "markdown.preview.scrollPreviewWithEditor": false,
+        
+        // pythonインタプリタに仮想環境のパスを通す
+        "python.defaultInterpreterPath": "/home/dev/.venv/bin/python"
       }
     }
   }

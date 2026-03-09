@@ -59,15 +59,23 @@ RUN su ${USERNAME} -c "curl -sSf https://sh.rustup.rs | sh -s -- -y --default-to
     && su ${USERNAME} -c "${CARGO_HOME}/bin/rustup component add rustfmt clippy" \
     && chown -R ${USERNAME}:${USERNAME} ${CARGO_HOME} ${RUSTUP_HOME}
 
+# Python パッケージ定義をイメージへコピー。
+COPY requirements.txt /tmp/requirements.txt
+
+# requirements.txt は root がコピーするため、通常ユーザーが削除できるよう所有権を変更する
+RUN chown ${USERNAME}:${USERNAME} /tmp/requirements.txt
+
 # 以降の作業は通常ユーザーで実行。
 USER ${USERNAME}
 
-# wandb を導入
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir wandb
+# 仮想環境を作成し、requirements.txt から Python パッケージを導入。
+RUN python -m venv /home/${USERNAME}/.venv \
+    && /home/${USERNAME}/.venv/bin/pip install --no-cache-dir --upgrade pip \
+    && /home/${USERNAME}/.venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -f /tmp/requirements.txt
 
-# pip のインストール先（.local/bin）を PATH に追加
-ENV PATH=/home/${USERNAME}/.local/bin:${PATH}
+# 仮想環境を優先し、必要に応じて .local/bin も利用可能にする。
+ENV PATH=/home/${USERNAME}/.venv/bin:/home/${USERNAME}/.local/bin:${PATH}
 
 WORKDIR /workspaces/procon-sandbox
 SHELL ["/bin/bash", "-c"]
