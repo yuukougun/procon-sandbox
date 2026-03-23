@@ -1,8 +1,18 @@
 #include "BitBoard.hpp"
 #include <bitset>
 
-// 8方向のシフト量
-constexpr int DIRS[8] = {1, -1, 8, -8, 9, -9, 7, -7};
+namespace {
+constexpr int DX[8] = {1, -1, 0, 0, 1, -1, 1, -1};
+constexpr int DY[8] = {0, 0, 1, -1, 1, -1, -1, 1};
+
+inline bool in_board(int x, int y) {
+    return (0 <= x && x < 8 && 0 <= y && y < 8);
+}
+
+inline uint64_t bit_at(int pos) {
+    return 1ULL << pos;
+}
+} // namespace
 
 // 盤面初期化
 BitBoard::BitBoard() {
@@ -18,64 +28,91 @@ void BitBoard::reset() {
     black_to_move = true;
 }
 
-// 合法手判定（簡易版: 8方向ビット演算）
 uint64_t BitBoard::get_legal_moves() const {
     uint64_t player = black_to_move ? black : white;
     uint64_t opponent = black_to_move ? white : black;
-    uint64_t empty = ~(black | white);
+    uint64_t occupied = black | white;
     uint64_t legal = 0;
-    for (int d = 0; d < 8; ++d) {
-        int dir = DIRS[d];
-        uint64_t mask = 0;
-        uint64_t tmp = player;
-        for (int i = 0; i < 6; ++i) {
-            // 1方向に相手石をたどる
-            if (dir > 0)
-                tmp = (tmp << dir) & opponent;
-            else
-                tmp = (tmp >> -dir) & opponent;
-            mask |= tmp;
+
+    for (int pos = 0; pos < 64; ++pos) {
+        if (occupied & bit_at(pos)) continue;
+        int x = pos % 8;
+        int y = pos / 8;
+
+        for (int d = 0; d < 8; ++d) {
+            int nx = x + DX[d];
+            int ny = y + DY[d];
+            bool seen_opponent = false;
+
+            while (in_board(nx, ny)) {
+                int np = ny * 8 + nx;
+                uint64_t b = bit_at(np);
+                if (opponent & b) {
+                    seen_opponent = true;
+                    nx += DX[d];
+                    ny += DY[d];
+                    continue;
+                }
+                if (seen_opponent && (player & b)) {
+                    legal |= bit_at(pos);
+                }
+                break;
+            }
+            if (legal & bit_at(pos)) break;
         }
-        if (dir > 0)
-            legal |= (mask << dir) & empty;
-        else
-            legal |= (mask >> -dir) & empty;
     }
     return legal;
 }
 
 // 指定位置に着手し石を反転
 void BitBoard::do_move(int pos) {
-    uint64_t move = 1ULL << pos;
+    if (pos < 0 || pos >= 64) {
+        // パス
+        black_to_move = !black_to_move;
+        return;
+    }
+    uint64_t move = bit_at(pos);
+    // 合法手チェック
+    uint64_t legal = get_legal_moves();
+    if ((move & legal) == 0) {
+        // 非合法手は無視
+        return;
+    }
     uint64_t player = black_to_move ? black : white;
     uint64_t opponent = black_to_move ? white : black;
     uint64_t flipped = 0;
+
+    int x = pos % 8;
+    int y = pos / 8;
     for (int d = 0; d < 8; ++d) {
-        int dir = DIRS[d];
-        uint64_t mask = 0;
-        uint64_t cur = move;
-        for (int i = 0; i < 6; ++i) {
-            if (dir > 0)
-                cur = (cur << dir) & opponent;
-            else
-                cur = (cur >> -dir) & opponent;
-            if (!cur) break;
-            mask |= cur;
+        int nx = x + DX[d];
+        int ny = y + DY[d];
+        std::vector<int> candidates;
+
+        while (in_board(nx, ny)) {
+            int np = ny * 8 + nx;
+            uint64_t b = bit_at(np);
+            if (opponent & b) {
+                candidates.push_back(np);
+                nx += DX[d];
+                ny += DY[d];
+                continue;
+            }
+            if (!candidates.empty() && (player & b)) {
+                for (int cp : candidates) {
+                    flipped |= bit_at(cp);
+                }
+            }
+            break;
         }
-        // 挟めたか判定
-        uint64_t end;
-        if (dir > 0)
-            end = (cur << dir) & player;
-        else
-            end = (cur >> -dir) & player;
-        if (end) flipped |= mask;
     }
+
     if (black_to_move) {
-        black ^= move | flipped;
-        white ^= flipped;
+        black |= move | flipped;
+        white &= ~flipped;
     } else {
-        white ^= move | flipped;
-        black ^= flipped;
+        white |= move | flipped;
+        black &= ~flipped;
     }
     black_to_move = !black_to_move;
 }
