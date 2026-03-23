@@ -1,2 +1,7 @@
 numpy
 wandb
+torch
+scikit-learn
+pytorch-lightning
+tensorboard
+ax-platform

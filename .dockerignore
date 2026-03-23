@@ -5,9 +5,10 @@
 **/target/
 **/bin/
  
-# workflow、wandb metadata
+# workflow、wandb、lightning_log metadata
 .spec-workflow
 wandb/
+lightning_logs/
 
 *.log
 .env

@@ -3,6 +3,7 @@ memo*
 .env
 .spec-workflow
 wandb/
+lightning_logs/
 
 **/target/
 **/bin/
