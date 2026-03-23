@@ -1,5 +1,6 @@
 memo*
 *.log
+*.bin
 .env
 .spec-workflow
 wandb/

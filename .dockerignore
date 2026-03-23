@@ -11,4 +11,5 @@ wandb/
 lightning_logs/
 
 *.log
+*.bin
 .env
