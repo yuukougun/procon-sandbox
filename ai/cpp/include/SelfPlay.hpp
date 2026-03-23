@@ -21,4 +21,7 @@ public:
 
     // CSVファイルに出力
     void save_csv(const std::string& filename) const;
+
+    // バイナリファイルに出力
+    void save_binary(const std::string& filename) const;
 };

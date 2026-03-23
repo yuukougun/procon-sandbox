@@ -38,3 +38,16 @@ void SelfPlay::save_csv(const std::string& filename) const {
         ofs << rec.black << "," << rec.white << "," << rec.black_to_move << "," << rec.move << "," << result << "\n";
     }
 }
+
+void SelfPlay::save_binary(const std::string& filename) const {
+    std::ofstream ofs(filename, std::ios::binary);
+    size_t n = history.size();
+    ofs.write(reinterpret_cast<const char*>(&n), sizeof(n));
+    ofs.write(reinterpret_cast<const char*>(&result), sizeof(result));
+    for (const auto& rec : history) {
+        ofs.write(reinterpret_cast<const char*>(&rec.black), sizeof(rec.black));
+        ofs.write(reinterpret_cast<const char*>(&rec.white), sizeof(rec.white));
+        ofs.write(reinterpret_cast<const char*>(&rec.black_to_move), sizeof(rec.black_to_move));
+        ofs.write(reinterpret_cast<const char*>(&rec.move), sizeof(rec.move));
+    }
+}
