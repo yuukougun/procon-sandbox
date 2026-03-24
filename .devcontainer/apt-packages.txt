@@ -1,0 +1,26 @@
+# Base development tools
+build-essential
+g++
+make
+cmake
+git
+sudo
+
+# Python toolchain
+python3
+python-is-python3
+python3-pip
+python3-venv
+
+# Documentation and diagrams
+doxygen
+graphviz
+
+# Utilities and CLI tools
+ca-certificates
+pkg-config
+openssh-client
+gh
+locales
+curl
+gnupg

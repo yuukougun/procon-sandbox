@@ -5,31 +5,17 @@ FROM ${BASE_IMAGE}
 # apt の対話プロンプトを抑止してビルドを安定化。
 ENV DEBIAN_FRONTEND=noninteractive
 
+# APT パッケージ定義をイメージへコピー。
+COPY .devcontainer/apt-packages.txt /tmp/apt-packages.txt
+
 # 開発に必要な基本ツールを導入。
 # c++、python、Node.js、rustを導入
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-        g++ \
-        make \
-        cmake \
-        git \
-        sudo \
-        python3 python-is-python3 \
-        python3-pip \
-        python3-venv \
-        doxygen \
-        graphviz \
-        ca-certificates \
-        pkg-config \
-        openssh-client \
-        gh \
-        locales \
-        curl \
-        gnupg \
+    && apt-get install -y --no-install-recommends $(grep -Ev '^\s*(#|$)' /tmp/apt-packages.txt) \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && locale-gen ja_JP.UTF-8 \
+    && rm -f /tmp/apt-packages.txt \
     && rm -rf /var/lib/apt/lists/*
 
 # ロケールを日本語 UTF-8 に固定（文字化け防止）。
