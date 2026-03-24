@@ -54,9 +54,29 @@ ENV CARGO_HOME=/home/${USERNAME}/.cargo
 ENV RUSTUP_HOME=/home/${USERNAME}/.rustup
 ENV PATH=${CARGO_HOME}/bin:${PATH}
 
-# Rustup をユーザー権限でインストールし、フォーマット/静的解析ツールを有効化。
+# Rust ツール設定をテキストファイルから読み込めるようにコピー。
+COPY .devcontainer/rustup-components.txt /tmp/rustup-components.txt
+COPY .devcontainer/rustup-targets.txt /tmp/rustup-targets.txt
+COPY .devcontainer/cargo-tools.txt /tmp/cargo-tools.txt
+
+# Rustup をユーザー権限でインストールし、コンポーネント/ターゲット/ツールを定義ファイルから導入。
 RUN su ${USERNAME} -c "curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable" \
-    && su ${USERNAME} -c "${CARGO_HOME}/bin/rustup component add rustfmt clippy" \
+    && while IFS= read -r component; do \
+        if [ -n "$component" ] && [ "${component#\#}" = "$component" ]; then \
+            su ${USERNAME} -c "${CARGO_HOME}/bin/rustup component add $component"; \
+        fi; \
+    done < /tmp/rustup-components.txt \
+    && while IFS= read -r target; do \
+        if [ -n "$target" ] && [ "${target#\#}" = "$target" ]; then \
+            su ${USERNAME} -c "${CARGO_HOME}/bin/rustup target add $target"; \
+        fi; \
+    done < /tmp/rustup-targets.txt \
+    && while IFS= read -r tool; do \
+        if [ -n "$tool" ] && [ "${tool#\#}" = "$tool" ]; then \
+            su ${USERNAME} -c "${CARGO_HOME}/bin/cargo install $tool"; \
+        fi; \
+    done < /tmp/cargo-tools.txt \
+    && rm -f /tmp/rustup-components.txt /tmp/rustup-targets.txt /tmp/cargo-tools.txt \
     && chown -R ${USERNAME}:${USERNAME} ${CARGO_HOME} ${RUSTUP_HOME}
 
 # Python パッケージ定義をイメージへコピー。
