@@ -131,27 +131,40 @@ fn app() -> Html {
     };
 
     html! {
-        <div class="app">
+        <div style="text-align:center;">
             <h1>{ "Yew Othello" }</h1>
-            <div class="board">
+            <div style="display:grid;grid-template-columns:repeat(8,40px);grid-template-rows:repeat(8,40px);width:fit-content;margin:0 auto;border:4px solid #333;background:#228b22;">
                 { for (0..SIZE*SIZE).map(|i| {
                     let s = board[i];
-                    let mut class = String::from("cell");
-                    if legal.contains(&i) { class.push_str(" legal"); }
-                    if s == Stone::Black { class.push_str(" black"); }
-                    else if s == Stone::White { class.push_str(" white"); }
+                    let cell_style = if legal.contains(&i) {
+                        "width:40px;height:40px;border:1px solid #333;box-sizing:border-box;cursor:pointer;background:#228b22;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 3px #ffe45c;"
+                    } else {
+                        "width:40px;height:40px;border:1px solid #333;box-sizing:border-box;cursor:pointer;background:#228b22;display:flex;align-items:center;justify-content:center;"
+                    };
+
+                    let stone = match s {
+                        Stone::Black => html! {
+                            <div style="width:30px;height:30px;border-radius:50%;background:#111;"></div>
+                        },
+                        Stone::White => html! {
+                            <div style="width:30px;height:30px;border-radius:50%;background:#fff;border:2px solid #aaa;box-sizing:border-box;"></div>
+                        },
+                        Stone::Empty => html! {},
+                    };
+
                     html! {
-                        <div class={class}
+                        <div style={cell_style}
                             onclick={let onclick = onclick.clone(); Callback::from(move |_| onclick.emit(i))}>
+                            { stone }
                         </div>
                     }
                 }) }
             </div>
-            <div class="status">
+            <div style="margin:10px;font-size:1.2em;">
                 { format!("手番: {}　黒:{} 白:{}", if *turn == Stone::Black { "黒" } else { "白" }, b, w) }
             </div>
             if *game_over {
-                <div class="game-over">{ "ゲーム終了" }</div>
+                <div style="color:red;font-weight:bold;">{ "ゲーム終了" }</div>
             }
             <button onclick={
                 let board = board.clone();
