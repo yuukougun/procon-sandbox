@@ -4,11 +4,11 @@
   "name": "procon-sandbox(nvidia)",
   "workspaceFolder": "/workspaces/procon-sandbox",
 
-  // ルートの Dockerfile を使って開発コンテナをビルドする。
+  // .devcontainer 配下の Dockerfile を使って開発コンテナをビルドする。
   // args は Dockerfile 側の ARG と対応し、ベースイメージやユーザーを揃えるために必要。
   "build": {
     "context": "../..",
-    "dockerfile": "../../Dockerfile",
+    "dockerfile": "../Dockerfile",
     "args": {
       "BASE_IMAGE": "nvidia/cuda:12.6.0-devel-ubuntu22.04"
     }
