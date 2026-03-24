@@ -61,7 +61,10 @@
         "markdown.preview.scrollPreviewWithEditor": false,
         
         // pythonインタプリタに仮想環境のパスを通す
-        "python.defaultInterpreterPath": "/home/dev/.venv/bin/python"
+        "python.defaultInterpreterPath": "/home/dev/.venv/bin/python",
+
+        // 指定ポートが使用中の場合、別のポートへの自動フォールバックを無効化
+        "remote.autoForwardPortsFallback": 0
       }
     }
   }

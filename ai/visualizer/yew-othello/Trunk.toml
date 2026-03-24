@@ -1,0 +1,14 @@
+
+
+[serve]
+addresses = ["127.0.0.1"]
+port = 8080
+open = false
+
+[[copy]]
+source = "index.html"
+dest = "index.html"
+
+[[copy]]
+source = "style.css"
+dest = "style.css"
