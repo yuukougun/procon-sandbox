@@ -1,4 +1,6 @@
+use console_error_panic_hook;
 use yew::prelude::*;
+use gloo_net::http::Request;
 
 const SIZE: usize = 8;
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -91,6 +93,9 @@ fn count_stones(board: &[Stone]) -> (usize, usize) {
 
 #[function_component(App)]
 fn app() -> Html {
+    // ファイル名入力用state
+    let file_name = use_state(|| "/data/game.csv".to_string());
+    // input_refは未使用なので削除
     // 対局履歴（boards）と現在インデックス（history_idx）をuse_stateで管理
     let boards = use_state(|| {
         let mut b = vec![Stone::Empty; SIZE*SIZE];
@@ -101,6 +106,79 @@ fn app() -> Html {
     let history_idx = use_state(|| 0usize);
     let turn = use_state(|| Stone::Black);
     let game_over = use_state(|| false);
+
+    // CSV読込・履歴反映
+    let boards_setter = boards.clone();
+    let history_idx_setter = history_idx.clone();
+    let turn_setter = turn.clone();
+    let game_over_setter = game_over.clone();
+    let file_name_state = file_name.clone();
+    let on_load_csv = {
+        Callback::from(move |_| {
+            web_sys::console::log_1(&"読込ボタン押下".into());
+            let boards_setter = boards_setter.clone();
+            let history_idx_setter = history_idx_setter.clone();
+            let turn_setter = turn_setter.clone();
+            let game_over_setter = game_over_setter.clone();
+            let file_name = file_name_state.to_string();
+            wasm_bindgen_futures::spawn_local(async move {
+                web_sys::console::log_1(&format!("[CSV] 読込開始: {}", file_name).into());
+                let resp = Request::get(&file_name).send().await;
+                if let Ok(resp) = resp {
+                    web_sys::console::log_1(&"[CSV] fetch成功".into());
+                    if let Ok(text) = resp.text().await {
+                        web_sys::console::log_1(&"[CSV] テキスト取得成功".into());
+                        let mut new_boards = Vec::new();
+                        for (i, line) in text.lines().enumerate() {
+                            if i == 0 { continue; } // skip header
+                            let cols: Vec<&str> = line.split(',').collect();
+                            if cols.len() < 5 {
+                                web_sys::console::error_1(&format!("[CSV] 列数が足りません: {}行目: {}", i+1, line).into());
+                                continue;
+                            }
+                            let black = match cols[0].parse::<u64>() {
+                                Ok(v) => v,
+                                Err(e) => {
+                                    web_sys::console::error_1(&format!("[CSV] black列のパース失敗: {}行目: {} ({})", i+1, cols[0], e).into());
+                                    continue;
+                                }
+                            };
+                            let white = match cols[1].parse::<u64>() {
+                                Ok(v) => v,
+                                Err(e) => {
+                                    web_sys::console::error_1(&format!("[CSV] white列のパース失敗: {}行目: {} ({})", i+1, cols[1], e).into());
+                                    continue;
+                                }
+                            };
+                            let mut b = vec![Stone::Empty; SIZE*SIZE];
+                            for idx in 0..64 {
+                                if (black >> idx) & 1 == 1 {
+                                    b[idx] = Stone::Black;
+                                } else if (white >> idx) & 1 == 1 {
+                                    b[idx] = Stone::White;
+                                }
+                            }
+                            new_boards.push(b);
+                        }
+                        if new_boards.is_empty() {
+                            web_sys::console::error_1(&"[CSV] 有効な棋譜が1件もありません".into());
+                        } else {
+                            let n = new_boards.len();
+                            boards_setter.set(new_boards);
+                            history_idx_setter.set(0);
+                            turn_setter.set(Stone::Black); // CSVの手番情報を使う場合はここを拡張
+                            game_over_setter.set(false);
+                            web_sys::console::log_1(&format!("[CSV] 棋譜{}件読込", n).into());
+                        }
+                    } else {
+                        web_sys::console::error_1(&"[CSV] レスポンスのテキスト取得に失敗".into());
+                    }
+                } else {
+                    web_sys::console::error_1(&"[CSV] ファイルの取得に失敗".into());
+                }
+            });
+        })
+    };
 
     use std::rc::Rc;
     let board = &boards[*history_idx];
@@ -158,6 +236,22 @@ fn app() -> Html {
 
     html! {
         <div style="text-align:center;">
+            <div style="margin-bottom:10px;">
+                <input
+                    type="text"
+                    value={(*file_name).clone()}
+                    oninput={
+                        let file_name = file_name.clone();
+                        Callback::from(move |e: InputEvent| {
+                            let input = e.target_dyn_into::<web_sys::HtmlInputElement>().unwrap();
+                            file_name.set(input.value());
+                        })
+                    }
+                    style="width:300px;"
+                />
+                <button onclick={on_load_csv.clone()}>{ "読込" }</button>
+                <span style="margin-left:10px;">{ "CSVファイルを指定してリプレイ" }</span>
+            </div>
             <h1>{ "Yew Othello" }</h1>
             <div style="display:grid;grid-template-columns:repeat(8,40px);grid-template-rows:repeat(8,40px);width:fit-content;margin:0 auto;border:4px solid #333;background:#228b22;">
                 { for (0..SIZE*SIZE).map(|i| {
@@ -205,7 +299,7 @@ fn app() -> Html {
                 }) }
             </div>
             <div style="margin:10px;font-size:1.2em;">
-                { format!("手番: {}　黒:{} 白:{}", if *turn == Stone::Black { "黒" } else { "白" }, b, w) }
+                { format!("手番: {} 黒:{} 白:{}", if *turn == Stone::Black { "黒" } else { "白" }, b, w) }
             </div>
             if *game_over {
                 <div style="color:red;font-weight:bold;">{ "ゲーム終了" }</div>
@@ -235,5 +329,7 @@ fn app() -> Html {
 }
 
 fn main() {
+    // panic時にブラウザconsoleへエラー出力
+    console_error_panic_hook::set_once();
     yew::Renderer::<App>::new().render();
 }
