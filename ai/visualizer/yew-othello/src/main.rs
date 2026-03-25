@@ -91,42 +91,68 @@ fn count_stones(board: &[Stone]) -> (usize, usize) {
 
 #[function_component(App)]
 fn app() -> Html {
-    let board = use_state(|| {
+    // 対局履歴（boards）と現在インデックス（history_idx）をuse_stateで管理
+    let boards = use_state(|| {
         let mut b = vec![Stone::Empty; SIZE*SIZE];
         b[27] = Stone::White; b[28] = Stone::Black;
         b[35] = Stone::Black; b[36] = Stone::White;
-        b
+        vec![b]
     });
+    let history_idx = use_state(|| 0usize);
     let turn = use_state(|| Stone::Black);
     let game_over = use_state(|| false);
 
     use std::rc::Rc;
-    let legal = Rc::new(get_legal_moves(&board, *turn));
-    let (b, w) = count_stones(&board);
+    let board = &boards[*history_idx];
+    let legal = Rc::new(get_legal_moves(board, *turn));
+    let (b, w) = count_stones(board);
 
     let onclick = {
-        let board = board.clone();
+        let boards = boards.clone();
+        let history_idx = history_idx.clone();
         let turn = turn.clone();
         let game_over = game_over.clone();
         let legal = legal.clone();
         Callback::from(move |pos: usize| {
             if *game_over { return; }
             if !legal.contains(&pos) { return; }
-            let new_board = do_move((*board).clone(), pos, *turn);
+            let new_board = do_move(boards[*history_idx].clone(), pos, *turn);
             let next_turn = opponent(*turn);
             let next_legal = get_legal_moves(&new_board, next_turn);
+            let mut new_boards = boards[..=*history_idx].to_vec();
+            new_boards.push(new_board.clone());
             if next_legal.is_empty() {
                 let again_legal = get_legal_moves(&new_board, *turn);
                 if again_legal.is_empty() {
                     game_over.set(true);
                 } else {
-                    board.set(new_board);
+                    boards.set(new_boards);
+                    history_idx.set(*history_idx + 1);
                     // パス
                     return;
                 }
             }
-            board.set(new_board);
+            boards.set(new_boards);
+            history_idx.set(*history_idx + 1);
             turn.set(next_turn);
+        })
+    };
+
+    let on_back = {
+        let history_idx = history_idx.clone();
+        Callback::from(move |_| {
+            if *history_idx > 0 {
+                history_idx.set(*history_idx - 1);
+            }
+        })
+    };
+    let on_forward = {
+        let boards = boards.clone();
+        let history_idx = history_idx.clone();
+        Callback::from(move |_| {
+            if *history_idx + 1 < boards.len() {
+                history_idx.set(*history_idx + 1);
+            }
         })
     };
 
@@ -136,10 +162,16 @@ fn app() -> Html {
             <div style="display:grid;grid-template-columns:repeat(8,40px);grid-template-rows:repeat(8,40px);width:fit-content;margin:0 auto;border:4px solid #333;background:#228b22;">
                 { for (0..SIZE*SIZE).map(|i| {
                     let s = board[i];
-                    let cell_style = if legal.contains(&i) {
-                        "width:40px;height:40px;border:1px solid #333;box-sizing:border-box;cursor:pointer;background:#228b22;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 3px #ffe45c;"
-                    } else {
-                        "width:40px;height:40px;border:1px solid #333;box-sizing:border-box;cursor:pointer;background:#228b22;display:flex;align-items:center;justify-content:center;"
+                    let cell_style = {
+                        let legal = legal.clone();
+                        let history_idx = history_idx.clone();
+                        let boards = boards.clone();
+                        let game_over = game_over.clone();
+                        if legal.contains(&i) && *history_idx + 1 == boards.len() && !*game_over {
+                            "width:40px;height:40px;border:1px solid #333;box-sizing:border-box;cursor:pointer;background:#228b22;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 3px #ffe45c;"
+                        } else {
+                            "width:40px;height:40px;border:1px solid #333;box-sizing:border-box;cursor:pointer;background:#228b22;display:flex;align-items:center;justify-content:center;"
+                        }
                     };
 
                     let stone = match s {
@@ -152,9 +184,21 @@ fn app() -> Html {
                         Stone::Empty => html! {},
                     };
 
+                    let onclick = {
+                        let onclick = onclick.clone();
+                        let history_idx = history_idx.clone();
+                        let boards = boards.clone();
+                        let game_over = game_over.clone();
+                        Callback::from(move |_| {
+                            if *history_idx + 1 == boards.len() && !*game_over {
+                                onclick.emit(i)
+                            }
+                        })
+                    };
+
                     html! {
                         <div style={cell_style}
-                            onclick={let onclick = onclick.clone(); Callback::from(move |_| onclick.emit(i))}>
+                            onclick={onclick}>
                             { stone }
                         </div>
                     }
@@ -166,15 +210,22 @@ fn app() -> Html {
             if *game_over {
                 <div style="color:red;font-weight:bold;">{ "ゲーム終了" }</div>
             }
+            <div style="margin:10px;">
+                <button onclick={on_back.clone()} disabled={*history_idx == 0}>{ "巻き戻し" }</button>
+                <span style="margin:0 10px;">{ format!("{}/{}", *history_idx + 1, boards.len()) }</span>
+                <button onclick={on_forward.clone()} disabled={*history_idx + 1 == boards.len()}>{ "進める" }</button>
+            </div>
             <button onclick={
-                let board = board.clone();
+                let boards = boards.clone();
+                let history_idx = history_idx.clone();
                 let turn = turn.clone();
                 let game_over = game_over.clone();
                 Callback::from(move |_| {
                     let mut b = vec![Stone::Empty; SIZE*SIZE];
                     b[27] = Stone::White; b[28] = Stone::Black;
                     b[35] = Stone::Black; b[36] = Stone::White;
-                    board.set(b);
+                    boards.set(vec![b]);
+                    history_idx.set(0);
                     turn.set(Stone::Black);
                     game_over.set(false);
                 })
