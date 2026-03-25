@@ -27,7 +27,7 @@
     - src/ … 実装（例: Rust, Python, C++ いずれも可）
     - README.md … 使い方・仕様
   - README.md … システム要件・設計方針（本ファイル）
-- requirements.txt … 必要なpythonパッケージ
+- .devcontainer/python-requirements.txt … 開発コンテナ用の必要なpythonパッケージ
 
 
 ---
