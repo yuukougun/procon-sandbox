@@ -1,3 +1,16 @@
+"""dataset.bin から局面価値ネットワークを学習するスクリプト。
+
+このファイルの学習フロー:
+1. Dataset を読み込み、train/val に分割
+2. CNN で局面価値 (おおよそ -1 から +1) を予測
+3. MSE 損失で回帰学習
+4. wandb に指標を記録して実験比較しやすくする
+
+勉強ポイント:
+- train_loss だけでなく val_loss を必ず見る
+- 指標は 1 回で判断せず、複数 run を比較する
+"""
+
 import argparse
 from typing import Tuple
 
@@ -10,7 +23,14 @@ from dataset import OthelloBinaryDataset
 
 
 class ValueNet(nn.Module):
-    """盤面から勝敗価値（-1~1）を予測する小型CNN。"""
+    """盤面から勝敗価値（-1~1）を予測する小型CNN。
+
+    設計意図:
+    - 3x3 Conv を重ねて局所的な石の関係を抽出
+    - 最後に全結合でスカラー価値へ圧縮
+
+    強くする段階では、層数やチャネル数を増やして表現力を上げる。
+    """
 
     def __init__(self, in_channels: int) -> None:
         super().__init__()
@@ -30,7 +50,11 @@ class ValueNet(nn.Module):
 
 
 def sign_accuracy(pred: torch.Tensor, target: torch.Tensor) -> float:
-    """符号一致率を簡易評価指標として計算する。"""
+    """符号一致率を簡易評価指標として計算する。
+
+    回帰タスクでも「勝ち/負けの向き」が合っているかを確認できる。
+    pred, target ともに 0 ちょうどは draw 寄りとして扱う。
+    """
     pred_sign = torch.sign(pred)
     target_sign = torch.sign(target)
     return float((pred_sign == target_sign).float().mean().item())
@@ -43,7 +67,12 @@ def run_epoch(
     device: torch.device,
     optimizer: torch.optim.Optimizer | None,
 ) -> Tuple[float, float]:
+    """1エポック分の学習または評価を行い、平均損失と平均精度を返す。"""
+
     is_train = optimizer is not None
+
+    # train=True で Dropout/BatchNorm が学習モードになる。
+    # このモデルには該当層はないが、一般化のため明示しておく。
     model.train(is_train)
 
     loss_sum = 0.0
@@ -51,6 +80,7 @@ def run_epoch(
     count = 0
 
     for x, y in loader:
+        # x: (B, C, 8, 8), y: (B, 1)
         x = x.to(device)
         y = y.to(device)
 
@@ -58,12 +88,17 @@ def run_epoch(
             optimizer.zero_grad()
 
         pred = model(x)
+
+        # MSE: 予測価値と教師価値の2乗誤差
+        #   L = mean((pred - y)^2)
         loss = criterion(pred, y)
 
         if is_train:
+            # 逆伝播で重み更新
             loss.backward()
             optimizer.step()
 
+        # バッチ平均をデータ全体平均に戻すため、件数で重み付けして蓄積する。
         batch_size = x.size(0)
         loss_sum += float(loss.item()) * batch_size
         acc_sum += sign_accuracy(pred.detach(), y.detach()) * batch_size
@@ -94,6 +129,7 @@ def main() -> None:
     if len(dataset) < 2:
         raise ValueError("dataset must contain at least 2 records")
 
+    # 検証データを確保し、過学習を検知できるようにする。
     val_size = max(1, int(len(dataset) * args.val_ratio))
     train_size = len(dataset) - val_size
     if train_size <= 0:
@@ -101,8 +137,10 @@ def main() -> None:
         val_size = 1
 
     generator = torch.Generator().manual_seed(args.seed)
+    # 乱数seedを固定して、実験比較時の再現性を上げる。
     train_ds, val_ds = random_split(dataset, [train_size, val_size], generator=generator)
 
+    # trainはshuffle=Trueでミニバッチ順序の偏りを減らす。
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False)
 
@@ -111,6 +149,8 @@ def main() -> None:
 
     model = ValueNet(in_channels=in_channels).to(device)
     criterion = nn.MSELoss()
+
+    # Adamは初期学習で安定しやすい実用的な最初の選択。
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     wandb.init(
@@ -130,6 +170,7 @@ def main() -> None:
     )
 
     for epoch in range(1, args.epochs + 1):
+        # 1エポック = 学習データ全体を1周。
         train_loss, train_acc = run_epoch(model, train_loader, criterion, device, optimizer)
         val_loss, val_acc = run_epoch(model, val_loader, criterion, device, optimizer=None)
 
@@ -151,6 +192,7 @@ def main() -> None:
             f"train_sign_acc={train_acc:.4f} val_sign_acc={val_acc:.4f}"
         )
 
+    # 次の実験や推論で再利用できるように重みを保存する。
     torch.save(model.state_dict(), args.save_model)
     print(f"saved model: {args.save_model}")
 
