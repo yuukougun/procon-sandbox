@@ -2,6 +2,12 @@
 #include <random>
 #include <fstream>
 
+namespace {
+int8_t to_int8_safely(int v) {
+    return static_cast<int8_t>(v);
+}
+} // namespace
+
 void SelfPlay::play_random_game() {
     history.clear();
     BitBoard board;
@@ -49,5 +55,25 @@ void SelfPlay::save_binary(const std::string& filename) const {
         ofs.write(reinterpret_cast<const char*>(&rec.white), sizeof(rec.white));
         ofs.write(reinterpret_cast<const char*>(&rec.black_to_move), sizeof(rec.black_to_move));
         ofs.write(reinterpret_cast<const char*>(&rec.move), sizeof(rec.move));
+    }
+}
+
+void SelfPlay::append_training_binary(const std::string& filename) const {
+    // 既存ファイル末尾に1局面ずつ追記する。
+    std::ofstream ofs(filename, std::ios::binary | std::ios::app);
+    for (const auto& rec : history) {
+        TrainingRecord out{
+            rec.black,
+            rec.white,
+            to_int8_safely(rec.black_to_move ? 1 : 0),
+            to_int8_safely(rec.move),
+            to_int8_safely(result),
+        };
+        // パディング依存を避けるため、各フィールドを逐次書き込みする。
+        ofs.write(reinterpret_cast<const char*>(&out.black), sizeof(out.black));
+        ofs.write(reinterpret_cast<const char*>(&out.white), sizeof(out.white));
+        ofs.write(reinterpret_cast<const char*>(&out.black_to_move), sizeof(out.black_to_move));
+        ofs.write(reinterpret_cast<const char*>(&out.move), sizeof(out.move));
+        ofs.write(reinterpret_cast<const char*>(&out.result), sizeof(out.result));
     }
 }

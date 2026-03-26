@@ -1,5 +1,6 @@
 #pragma once
 #include "BitBoard.hpp"
+#include <cstdint>
 #include <vector>
 #include <string>
 
@@ -16,6 +17,15 @@ public:
     std::vector<Record> history;
     int result; // 1:黒勝ち, -1:白勝ち, 0:引き分け
 
+    // dataset.binへ保存する固定長レコード（19バイト）
+    struct TrainingRecord {
+        uint64_t black;
+        uint64_t white;
+        int8_t black_to_move;
+        int8_t move;
+        int8_t result;
+    };
+
     // ランダム自己対戦を実行
     void play_random_game();
 
@@ -24,4 +34,7 @@ public:
 
     // バイナリファイルに出力
     void save_binary(const std::string& filename) const;
+
+    // dataset.bin向けに固定長レコードを追記出力
+    void append_training_binary(const std::string& filename) const;
 };

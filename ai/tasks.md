@@ -13,12 +13,12 @@
 - [x] C++側ユニットテスト・main関数による動作検証
 
 ## Phase 2: Python側MVP
-- [ ] C++側で単一バイナリファイル `ai/data/dataset.bin` への追記保存を標準化
-- [ ] dataset.pyで `dataset.bin` を `np.fromfile` + 構造化dtypeで読み込み、PyTorch Dataset化
-- [ ] ビットボード（black/white）を8x8の2チャネル（必要に応じて+手番チャネル）へ変換
-- [ ] train.pyで簡易NNモデル・学習ループを実装（まずはMSEで学習可能にする）
-- [ ] wandbで `train_loss` / `val_loss` / `epoch` / `learning_rate` を記録
-- [ ] Python側でデータ読み込み、shape確認、1エポック学習、wandb可視化を検証
+- [x] C++側で単一バイナリファイル `ai/data/dataset.bin` への追記保存を標準化
+- [x] dataset.pyで `dataset.bin` を `np.fromfile` + 構造化dtypeで読み込み、PyTorch Dataset化
+- [x] ビットボード（black/white）を8x8の2チャネル（必要に応じて+手番チャネル）へ変換
+- [x] train.pyで簡易NNモデル・学習ループを実装（まずはMSEで学習可能にする）
+- [x] wandbで `train_loss` / `val_loss` / `epoch` / `learning_rate` を記録
+- [x] Python側でデータ読み込み、shape確認、1エポック学習、wandb可視化を検証
 
 ## Phase 3: 精度改善・学習サイクル準備
 - [ ] データ分割（train/val）と評価指標（`val_loss`, `sign(pred)==result`）を整備
