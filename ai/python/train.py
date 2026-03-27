@@ -23,33 +23,7 @@ from torch.utils.data import DataLoader, random_split
 import wandb
 
 from dataset import OthelloBinaryDataset
-
-
-class ValueNet(nn.Module):
-    """盤面から勝敗価値（-1~1）を予測する小型CNN。
-
-    設計意図:
-    - 3x3 Conv を重ねて局所的な石の関係を抽出
-    - 最後に全結合でスカラー価値へ圧縮
-
-    強くする段階では、層数やチャネル数を増やして表現力を上げる。
-    """
-
-    def __init__(self, in_channels: int) -> None:
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Flatten(),
-            nn.Linear(64 * 8 * 8, 128),
-            nn.ReLU(),
-            nn.Linear(128, 1),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x)
+from model import ValueNet
 
 
 def sign_accuracy(pred: torch.Tensor, target: torch.Tensor) -> float:
