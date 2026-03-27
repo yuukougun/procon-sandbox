@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <random>
+#include <utility>
 
 // 1ゲーム分の盤面・手・勝敗を記録し、自己対戦を行う
 class SelfPlay {
@@ -11,6 +12,12 @@ public:
     enum class TieBreakMode {
         FixedMinIndex,
         RandomAmongBest,
+    };
+
+    enum class ModelSideMode {
+        BothModel,
+        BlackModelOnly,
+        WhiteModelOnly,
     };
 
     struct Record {
@@ -39,6 +46,7 @@ public:
     void play_model_guided_game(
         const std::string& model_path,
         const std::string& inference_script,
+        ModelSideMode model_side_mode = ModelSideMode::BothModel,
         TieBreakMode tie_break_mode = TieBreakMode::FixedMinIndex,
         uint32_t random_seed = 42
     );
@@ -61,7 +69,27 @@ public:
     // dataset.bin向けに固定長レコードを追記出力
     void append_training_binary(const std::string& filename) const;
 
+    // ビーム探索で1回の探索から複数の終局対局を生成し、datasetへ追記する
+    // 戻り値: (生成局数, 追記局面数)
+    std::pair<int, size_t> append_training_binary_with_beam(
+        const std::string& filename,
+        const std::string& inference_script,
+        int target_games,
+        int beam_width,
+        int top_k,
+        const std::string& black_model_path,
+        const std::string& white_model_path,
+        TieBreakMode tie_break_mode = TieBreakMode::RandomAmongBest,
+        int log_interval = 10,
+        uint32_t random_seed = 42
+    );
+
 private:
+    struct MoveScore {
+        int move;
+        double score;
+    };
+
     int select_best_move_by_model(
         const BitBoard& board,
         uint64_t legal,
@@ -69,5 +97,12 @@ private:
         const std::string& inference_script,
         TieBreakMode tie_break_mode,
         std::mt19937& gen
+    ) const;
+
+    std::vector<MoveScore> evaluate_moves_by_model(
+        const BitBoard& board,
+        uint64_t legal,
+        const std::string& model_path,
+        const std::string& inference_script
     ) const;
 };

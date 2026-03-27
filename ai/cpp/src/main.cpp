@@ -1,11 +1,18 @@
 #include "SelfPlay.hpp"
 #include <iostream>
 #include <string>
+#include <exception>
 
 namespace {
 SelfPlay::TieBreakMode parse_tie_break(const std::string& s) {
     if (s == "random") return SelfPlay::TieBreakMode::RandomAmongBest;
     return SelfPlay::TieBreakMode::FixedMinIndex;
+}
+
+SelfPlay::ModelSideMode parse_model_side(const std::string& s) {
+    if (s == "black") return SelfPlay::ModelSideMode::BlackModelOnly;
+    if (s == "white") return SelfPlay::ModelSideMode::WhiteModelOnly;
+    return SelfPlay::ModelSideMode::BothModel;
 }
 
 std::string get_arg(int argc, char** argv, const std::string& key, const std::string& default_value) {
@@ -22,70 +29,79 @@ int get_arg_int(int argc, char** argv, const std::string& key, int default_value
 
 int main(int argc, char** argv) {
     const std::string mode = get_arg(argc, argv, "--mode", "random");
-    const int num_games = get_arg_int(argc, argv, "--num-games", 1000);
-    const std::string csv_path = get_arg(argc, argv, "--csv", "ai/data/game.csv");
-    const std::string old_bin_path = get_arg(argc, argv, "--legacy-bin", "ai/data/game.bin");
+    const int num_games = get_arg_int(argc, argv, "--num-games", 1);
     const std::string dataset_path = get_arg(argc, argv, "--dataset", "ai/data/dataset.bin");
     const std::string model_path = get_arg(argc, argv, "--model", "");
     const std::string model_black = get_arg(argc, argv, "--model-black", "");
     const std::string model_white = get_arg(argc, argv, "--model-white", "");
     const std::string inference_script = get_arg(argc, argv, "--inference-script", "ai/python/value_inference_wrapper.py");
     const auto tie_break_mode = parse_tie_break(get_arg(argc, argv, "--tie-break", "fixed"));
+    const auto model_side_mode = parse_model_side(get_arg(argc, argv, "--model-side", "black"));
+    const int beam_width = get_arg_int(argc, argv, "--beam-width", 32);
+    const int beam_top_k = get_arg_int(argc, argv, "--beam-top-k", 2);
+    const int log_interval = get_arg_int(argc, argv, "--log-interval", 10);
     const int seed = get_arg_int(argc, argv, "--seed", 42);
 
-    size_t total_positions = 0;
+    if (num_games != 1) {
+        std::cerr << "warning: data generation is fixed to 1 game. --num-games is ignored.\n";
+    }
 
-    if (mode == "duel") {
+    std::string black_model_path;
+    std::string white_model_path;
+
+    if (mode == "random") {
+        // 両者ランダムでビーム展開
+        black_model_path = "";
+        white_model_path = "";
+    } else if (mode == "guided") {
+        if (model_path.empty()) {
+            std::cerr << "guided mode requires --model\n";
+            return 1;
+        }
+        if (model_side_mode == SelfPlay::ModelSideMode::BlackModelOnly) {
+            black_model_path = model_path;
+            white_model_path = "";
+        } else if (model_side_mode == SelfPlay::ModelSideMode::WhiteModelOnly) {
+            black_model_path = "";
+            white_model_path = model_path;
+        } else {
+            black_model_path = model_path;
+            white_model_path = model_path;
+        }
+    } else if (mode == "duel") {
         if (model_black.empty() || model_white.empty()) {
             std::cerr << "duel mode requires --model-black and --model-white\n";
             return 1;
         }
-
-        int black_wins = 0;
-        int white_wins = 0;
-        int draws = 0;
-        for (int i = 0; i < num_games; ++i) {
-            SelfPlay sp;
-            sp.play_duel_game(model_black, model_white, inference_script, tie_break_mode, static_cast<uint32_t>(seed + i));
-            if (sp.result > 0) ++black_wins;
-            else if (sp.result < 0) ++white_wins;
-            else ++draws;
-        }
-
-        std::cout << "duel finished\n";
-        std::cout << "games=" << num_games
-                  << " black_wins=" << black_wins
-                  << " white_wins=" << white_wins
-                  << " draws=" << draws << "\n";
-        return 0;
+        black_model_path = model_black;
+        white_model_path = model_white;
+    } else {
+        std::cerr << "unsupported mode: " << mode << " (use random|guided|duel)\n";
+        return 1;
     }
 
-    for (int i = 0; i < num_games; ++i) {
+    try {
         SelfPlay sp;
-        if (mode == "guided") {
-            if (model_path.empty()) {
-                std::cerr << "guided mode requires --model\n";
-                return 1;
-            }
-            sp.play_model_guided_game(model_path, inference_script, tie_break_mode, static_cast<uint32_t>(seed + i));
-        } else {
-            sp.play_random_game();
-        }
+        auto [generated_games, positions] = sp.append_training_binary_with_beam(
+            dataset_path,
+            inference_script,
+            1,
+            beam_width,
+            beam_top_k,
+            black_model_path,
+            white_model_path,
+            tie_break_mode,
+            log_interval,
+            static_cast<uint32_t>(seed)
+        );
 
-        // 既存動作確認向け出力（最終ゲームのみ上書き）。
-        if (i == num_games - 1) {
-            sp.save_csv(csv_path);
-            sp.save_binary(old_bin_path);
-        }
-
-        // 学習用データセットは1ファイルに追記していく。
-        sp.append_training_binary(dataset_path);
-        total_positions += sp.history.size();
+        std::cout << mode << " self-play (beam) finished.\n";
+        std::cout << "Games: " << generated_games << "\n";
+        std::cout << "Total positions appended: " << positions << "\n";
+        std::cout << "Output: " << dataset_path << std::endl;
+        return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "fatal: " << e.what() << "\n";
+        return 1;
     }
-
-    std::cout << (mode == "guided" ? "Guided" : "Random") << " self-play finished.\n";
-    std::cout << "Games: " << num_games << "\n";
-    std::cout << "Total positions appended: " << total_positions << "\n";
-    std::cout << "Output: " << dataset_path << std::endl;
-    return 0;
 }
