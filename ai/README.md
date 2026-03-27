@@ -74,6 +74,15 @@
 - `train.py`: モデル定義・学習ループ
 - `engine.py`: （将来）pybind11ラッパー or サブプロセス呼び出し
 
+#### pybind11ラッパー（Phase 4実装）
+- C++エンジンをPythonから直接呼び出す拡張モジュール `othello_cpp_engine` を追加。
+- ビルド方法:
+  - `source /home/dev/.venv/bin/activate`
+  - `python ai/python/build_cpp_engine.py build_ext --inplace`
+- Pythonからの利用例:
+  - `from ai.python.engine import generate_dataset_beam`
+  - `generate_dataset_beam(mode="guided", dataset_path="ai/data/dataset.bin", model_path="ai/data/models/xxx.ckpt")`
+
 ---
 
 ### 実装ステップ

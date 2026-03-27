@@ -6,6 +6,7 @@ memo*
 wandb/
 lightning_logs/
 
+**/build/
 **/target/
 **/bin/
 **/__pycache__/

@@ -3,34 +3,19 @@
 from __future__ import annotations
 
 import argparse
-import glob
 import json
-import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import List
+
+from engine import generate_dataset_beam, play_duel_once
 
 
 def run(cmd: List[str]) -> str:
     out = subprocess.check_output(cmd, text=True)
     return out.strip()
-
-
-def compile_cpp() -> None:
-    run(
-        [
-            "g++",
-            "-std=c++17",
-            "-O2",
-            "ai/cpp/src/BitBoard.cpp",
-            "ai/cpp/src/SelfPlay.cpp",
-            "ai/cpp/src/main.cpp",
-            "-Iai/cpp/include",
-            "-o",
-            "ai/cpp/bin/selfplay",
-        ]
-    )
 
 
 def concat_replay_files(files: List[Path], out_path: Path) -> None:
@@ -39,18 +24,6 @@ def concat_replay_files(files: List[Path], out_path: Path) -> None:
         for f in files:
             with f.open("rb") as in_f:
                 shutil.copyfileobj(in_f, out_f)
-
-
-def parse_duel_result(text: str) -> dict:
-    # 期待形式: games=... black_wins=... white_wins=... draws=...
-    parts = text.split()
-    info = {}
-    for p in parts:
-        if "=" in p:
-            k, v = p.split("=", 1)
-            if v.isdigit():
-                info[k] = int(v)
-    return info
 
 
 def main() -> None:
@@ -65,8 +38,6 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=1e-3)
     args = parser.parse_args()
 
-    compile_cpp()
-
     replay_dir = Path("ai/data/replay")
     replay_dir.mkdir(parents=True, exist_ok=True)
     history_path = Path("ai/data/phase4_loop_history.jsonl")
@@ -78,24 +49,19 @@ def main() -> None:
         cycle_id = f"cycle-{cycle:03d}"
         cycle_dataset = replay_dir / f"{cycle_id}.bin"
 
-        # 1) 現モデルで自己対戦データを生成
-        run(
-            [
-                "ai/cpp/bin/selfplay",
-                "--mode",
-                "guided",
-                "--model",
-                str(current_ckpt),
-                "--inference-script",
-                "ai/python/value_inference_wrapper.py",
-                "--dataset",
-                str(cycle_dataset),
-                "--num-games",
-                str(args.num_games),
-                "--tie-break",
-                "random",
-            ]
-        )
+        # 1) 現モデルで自己対戦データを生成（pybind）
+        for i in range(args.num_games):
+            generate_dataset_beam(
+                mode="guided",
+                dataset_path=str(cycle_dataset),
+                model_path=str(current_ckpt),
+                model_side="black",
+                beam_width=32,
+                beam_top_k=2,
+                tie_break="random",
+                log_interval=1,
+                seed=42 + cycle * 1000 + i,
+            )
 
         # 2) リプレイバッファ（直近N世代）を結合して学習用データを作る
         all_cycle_files = sorted(Path("ai/data/replay").glob("cycle-*.bin"))
@@ -107,7 +73,7 @@ def main() -> None:
         new_model_id = f"value-phase4-{cycle_id}"
         run(
             [
-                "python",
+                sys.executable,
                 "ai/python/train.py",
                 "--dataset",
                 str(train_dataset),
@@ -136,28 +102,30 @@ def main() -> None:
 
         new_ckpt = Path(f"ai/data/models/{new_model_id}.ckpt")
 
-        # 4) 旧新モデルの対戦評価（黒=新 / 白=旧）
-        duel_text = run(
-            [
-                "ai/cpp/bin/selfplay",
-                "--mode",
-                "duel",
-                "--model-black",
-                str(new_ckpt),
-                "--model-white",
-                str(current_ckpt),
-                "--inference-script",
-                "ai/python/value_inference_wrapper.py",
-                "--num-games",
-                str(args.duel_games),
-                "--tie-break",
-                "random",
-            ]
-        )
-        duel_info = parse_duel_result(duel_text)
+        # 4) 旧新モデルの対戦評価（黒=新 / 白=旧, pybind）
+        black_wins = 0
+        white_wins = 0
+        draws = 0
+        for i in range(args.duel_games):
+            result = play_duel_once(
+                model_black=str(new_ckpt),
+                model_white=str(current_ckpt),
+                tie_break="random",
+                seed=84 + cycle * 2000 + i,
+            )
+            if result > 0:
+                black_wins += 1
+            elif result < 0:
+                white_wins += 1
+            else:
+                draws += 1
 
-        black_wins = duel_info.get("black_wins", 0)
-        white_wins = duel_info.get("white_wins", 0)
+        duel_info = {
+            "games": args.duel_games,
+            "black_wins": black_wins,
+            "white_wins": white_wins,
+            "draws": draws,
+        }
         adopted = black_wins >= white_wins
 
         prev_model_id = current_model_id
