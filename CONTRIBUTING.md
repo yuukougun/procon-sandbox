@@ -25,9 +25,9 @@
 REPOSITORY
 ├── .github
 │   └── workflows
-|       ├── test.yml    # pull request時にtesterを実行し、コメント
-|       ├── linter.yml  # pull request時にリンターを実行し、コメント
-│       └── doxygen.yml # ライブラリの設計仕様をpagesにデプロイ
+|       ├── test.yml      # pull request時にtesterを実行し、コメント
+|       ├── linter.yml    # pull request時にリンターを実行し、コメント
+│       └── docs-pages.yml # Doxygen/Sphinxで生成したドキュメントをpagesにデプロイ
 ├── .vscode
 │   ├── settings.json   # 設定ファイル
 │   ├── extensions.json # 推奨拡張機能のリスト
@@ -60,8 +60,8 @@ REPOSITORY
 └── README.md           # リポジトリの説明（使い方など）
 ```
 
-> ### `doxygen.yml`ファイル
-> libraryフォルダで定義したクラスや関数を **`doxygen`** でドキュメンテーション化し、 **`github pages`** に自動デプロイする。<br>
+> ### `docs-pages.yml`ファイル
+> libraryフォルダやpythonライブラリで定義したクラスや関数を **`doxygen`** / **`sphinx`** でドキュメンテーション化し、 **`github pages`** に自動デプロイする。<br>
 >
 > github pagesのリンクは[こちら](https://google.com)
 
