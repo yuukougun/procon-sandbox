@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd /workspaces/procon-sandbox
+echo "run CreateCommand"
+
+git config core.hooksPath docs/git-hooks
+chmod +x docs/git-hooks/*
+
+git config merge.ff false
