@@ -41,18 +41,19 @@ jobs:
       - name: Build documentation site
         run: |
           python .github/scripts/build_docs_site.py \
-            --config docs/libraries.json \
+            --config .github/libraries.json \
             --output site
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: site
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

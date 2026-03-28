@@ -340,7 +340,7 @@ def build_site(config_path: Path, output_dir: Path) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build docs site for GitHub Pages")
-    parser.add_argument("--config", required=True, type=Path, help="Path to docs/libraries.json")
+    parser.add_argument("--config", required=True, type=Path, help="Path to .github/libraries.json")
     parser.add_argument("--output", required=True, type=Path, help="Output directory for static site")
     return parser.parse_args()
 

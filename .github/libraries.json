@@ -2,6 +2,31 @@
   "version": 1,
   "libraries": [
     {
+      "id": "sample-cpp-library",
+      "title": "Sample C++ Library",
+      "language": "cpp",
+      "source_paths": [
+        "library/cpp"
+      ],
+      "description": "Small C++ sample library for GitHub Pages documentation preview.",
+      "output_subdir": "cpp/sample",
+      "enabled": true
+    },
+    {
+      "id": "sample-python-library",
+      "title": "Sample Python Library",
+      "language": "python",
+      "source_paths": [
+        "library/python"
+      ],
+      "python_modules": [
+        "sample_math"
+      ],
+      "description": "Small Python sample library for GitHub Pages documentation preview.",
+      "output_subdir": "python/sample",
+      "enabled": true
+    },
+    {
       "id": "ai-cpp-core",
       "title": "AI C++ Core Library",
       "language": "cpp",
