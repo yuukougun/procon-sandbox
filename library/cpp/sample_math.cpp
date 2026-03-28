@@ -9,7 +9,7 @@ int SampleMath::sum(const std::vector<int>& values) {
 }
 
 std::string SampleMath::greet(const std::string& name) {
-    return "Hello, " + name;
+    return "Hi, " + name;
 }
 
 }  // namespace sample

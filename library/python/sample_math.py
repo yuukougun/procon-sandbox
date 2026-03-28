@@ -28,6 +28,21 @@ class Greeter:
 
         self.prefix = prefix
 
+
+def multiply_values(values: list[int]) -> int:
+    """Return the product of integer values.
+
+    Args:
+        values: Input list of integers.
+
+    Returns:
+        The total product of values. Returns 1 for an empty list.
+    """
+    result = 1
+    for v in values:
+        result *= v
+    return result
+
     def greet(self, name: str) -> str:
         """Build a greeting message.
 
