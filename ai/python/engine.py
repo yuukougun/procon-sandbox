@@ -6,11 +6,25 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+def _append_cpp_engine_paths() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    candidates = [
+        repo_root,
+        repo_root / "ai/python/build",
+    ]
+    candidates.extend((repo_root / "ai/python/build").glob("lib.*"))
+
+    for p in candidates:
+        if p.exists():
+            s = str(p)
+            if s not in sys.path:
+                sys.path.insert(0, s)
+
+
 try:
     import othello_cpp_engine as _engine
 except ModuleNotFoundError:
-    repo_root = Path(__file__).resolve().parents[2]
-    sys.path.insert(0, str(repo_root))
+    _append_cpp_engine_paths()
     import othello_cpp_engine as _engine
 
 
