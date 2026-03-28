@@ -13,26 +13,33 @@
 - [x] C++側ユニットテスト・main関数による動作検証
 
 ## Phase 2: Python側MVP
-- [ ] C++側で単一バイナリファイル `ai/data/dataset.bin` への追記保存を標準化
-- [ ] dataset.pyで `dataset.bin` を `np.fromfile` + 構造化dtypeで読み込み、PyTorch Dataset化
-- [ ] ビットボード（black/white）を8x8の2チャネル（必要に応じて+手番チャネル）へ変換
-- [ ] train.pyで簡易NNモデル・学習ループを実装（まずはMSEで学習可能にする）
-- [ ] wandbで `train_loss` / `val_loss` / `epoch` / `learning_rate` を記録
-- [ ] Python側でデータ読み込み、shape確認、1エポック学習、wandb可視化を検証
+- [x] C++側で単一バイナリファイル `ai/data/dataset.bin` への追記保存を標準化
+- [x] dataset.pyで `dataset.bin` を `np.fromfile` + 構造化dtypeで読み込み、PyTorch Dataset化
+- [x] ビットボード（black/white/turn）を8x8の3チャネル入力として扱えるようにする
+- [x] train.pyで簡易NNモデル・学習ループを実装（まずはMSEで学習可能にする）
+- [x] wandbで `train_loss` / `val_loss` / `epoch` / `learning_rate` を記録
+- [x] Python側でデータ読み込み、shape確認、1エポック学習、wandb可視化を検証
 
 ## Phase 3: 精度改善・学習サイクル準備
-- [ ] データ分割（train/val）と評価指標（`val_loss`, `sign(pred)==result`）を整備
-- [ ] 入力特徴量（2チャネル vs 3チャネル）とモデル構成の比較実験
+- [x] データ分割（train/val）と評価指標（`val_loss`, `sign(pred)==result`）を整備
+- [x] 3チャネル入力（black/white/turn）での学習安定性を確認
 - [ ] ハイパーパラメータ探索（学習率、バッチサイズ、重み減衰）
-- [ ] wandbで実験条件と結果を比較可能な形で管理
-- [ ] モデルIDとデータ生成元の対応付けルールを定義
+- [x] wandbで実験条件と結果を比較可能な形で管理
+- [x] モデル重み再利用の運用ルールを定義（保存名、再開手順、比較基準run）
+- [x] モデルIDとデータ生成元の対応付けルールを定義
 
 ## Phase 4: C++/Python統合強化（将来）
-- [ ] 学習済みモデルの利用方式を決定（ONNX/推論ラッパーなど）
-- [ ] C++自己対戦をランダム手から方策選択へ移行（例: $\epsilon$-greedy）
-- [ ] 自動ループ「自己対戦 → 学習 → モデル更新 → 対戦評価」を構築
-- [ ] 退化防止のためのリプレイバッファ運用を導入
-- [ ] pybind11によるC++エンジンのPythonラッパー実装（必要に応じて）
+- [x] 学習済みモデルの利用方式を決定（ONNX/推論ラッパーなど）
+- [x] C++側で合法手のみを列挙し、1手先価値最大の手を選択する推論ループを実装
+- [x] 同点時タイブレーク（固定ルールまたは乱択）を定義
+- [x] 自動ループ「自己対戦 → 学習 → モデル更新 → 対戦評価」を構築
+- [x] 退化防止のためのリプレイバッファ運用を導入
+- [x] pybind11によるC++エンジンのPythonラッパー実装（必要に応じて）
+
+## Phase 5: 自動学習ループの確立
+- [ ] 最新モデルの最善手選択で自己対局データを継続追記
+- [ ] 旧新モデル対戦で改善傾向を監視し、採用基準を運用
+- [ ] 対人想定評価で目標勝率を計測
 
 ## Visualizer（対局可視化ツール）
 - [x] CLIで動作するCUI版visualizerの設計・実装
