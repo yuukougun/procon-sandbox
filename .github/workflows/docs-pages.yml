@@ -17,7 +17,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  detect-library-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.detect.outputs.should_run }}
+      reason: ${{ steps.detect.outputs.reason }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes for configured libraries
+        id: detect
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          python .github/scripts/detect_library_changes.py \
+          --config .github/libraries.json \
+          --event-name "$EVENT_NAME" \
+          --before-sha "$BEFORE_SHA" \
+          --current-sha "$CURRENT_SHA"
+
   build-docs:
+    needs: detect-library-changes
+    if: needs.detect-library-changes.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -53,12 +79,14 @@ jobs:
           path: site
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: needs.detect-library-changes.outputs.should_run == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build-docs
+    needs:
+      - detect-library-changes
+      - build-docs
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
