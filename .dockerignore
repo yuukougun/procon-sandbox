@@ -1,0 +1,17 @@
+# VCS metadata
+.git
+
+# Build artifacts and local bins
+**/build/
+**/target/
+**/bin/
+**/__pycache__/
+ 
+# workflow、wandb、lightning_log metadata
+.spec-workflow
+wandb/
+lightning_logs/
+
+*.log
+*.bin
+.env

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if git diff --cached --name-only | grep "^docs/" > /dev/null; then
+    echo "CONTRIBUTING.mdの生成"
+
+    # contributing.mdファイルの生成
+    bash docs/script/gen-contribut
+
+    # 変更をステージング
+    git add docs/*.md
+    git add CONTRIBUTING.md
+fi
