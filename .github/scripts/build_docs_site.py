@@ -54,7 +54,7 @@ def build_cpp_docs(library: Dict[str, Any], repo_root: Path, output_dir: Path) -
                 "SHOW_USED_FILES = NO",
                 "SHOW_FILES = NO",
                 "SHOW_INCLUDE_FILES = NO",
-                "SHOW_DIRECTORIES = NO",
+                "SHOW_DIRECTORIES = YES",
                 "RECURSIVE = YES",
                 "FILE_PATTERNS = *.h *.hpp *.hh *.c *.cc *.cpp",
                 "GENERATE_HTML = YES",
