@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "libraries": [
+    {
+      "id": "ai-cpp-core",
+      "title": "AI C++ Core Library",
+      "language": "cpp",
+      "source_paths": [
+        "ai/cpp/include",
+        "ai/cpp/src"
+      ],
+      "description": "Core C++ modules for board logic and self-play execution.",
+      "output_subdir": "cpp/ai-core",
+      "enabled": true
+    },
+    {
+      "id": "ai-python-core",
+      "title": "AI Python Core Library",
+      "language": "python",
+      "source_paths": [
+        "ai/python"
+      ],
+      "python_modules": [
+        "dataset",
+        "engine",
+        "model",
+        "value_inference_wrapper"
+      ],
+      "python_mock_imports": [
+        "torch",
+        "wandb",
+        "numpy",
+        "othello_cpp_engine"
+      ],
+      "description": "Python modules for data pipeline, inference wrappers, and model definition.",
+      "output_subdir": "python/ai-core",
+      "enabled": true
+    }
+  ]
+}
