@@ -44,9 +44,9 @@
   - 盤面状態・手・勝敗のシリアライズ（バイナリ/CSV出力）
 
 - `SelfPlay`クラス
-  - ランダム手による自己対戦
-  - 1ゲーム分の盤面遷移・手・勝敗を記録
-  - データファイル出力
+  - ビームサーチによる自己対戦データ生成
+  - 1ゲーム分の盤面遷移・手・勝敗を記録し、`dataset.bin`へ追記
+  - `random/guided/duel` を統一インターフェースで実行
 
 ---
 
@@ -78,10 +78,24 @@
 - C++エンジンをPythonから直接呼び出す拡張モジュール `othello_cpp_engine` を追加。
 - ビルド方法:
   - `source /home/dev/.venv/bin/activate`
-  - `python ai/python/build_cpp_engine.py build_ext --inplace`
+  - `python ai/python/build_cpp_engine.py build_ext`
+- ビルド成果物:
+  - 中間生成物: `ai/python/build/`
+  - 拡張モジュール: `ai/python/build/lib.linux-x86_64-3.10/othello_cpp_engine*.so`
+- 注意:
+  - `--inplace` を付けてもリポジトリルートへ `.so` はコピーしない
 - Pythonからの利用例:
   - `from ai.python.engine import generate_dataset_beam`
   - `generate_dataset_beam(mode="guided", dataset_path="ai/data/dataset.bin", model_path="ai/data/models/xxx.ckpt")`
+  - `from ai.python.engine import play_duel_once`
+  - `play_duel_once(model_black="...", model_white="...")`
+
+#### 現在の自己対戦データ生成仕様（重要）
+- データ生成はビームサーチ方式に統一（従来の複数ゲーム反復生成は廃止）
+- `--mode random|guided|duel` の全モードで同じビーム探索基盤を使用
+- 実行時の `--num-games` は無視され、常に1ゲーム分を生成
+- ログは「ゲーム数」ではなくビーム探索ループごとに出力
+- C++側から呼ぶPython推論でエラー発生時は即時停止（非0終了）
 
 ---
 
@@ -89,7 +103,7 @@
 
 #### Phase 1: C++エンジンMVP
 1. `BitBoard`クラス実装（合法手判定・反転・終了判定）
-2. `SelfPlay`クラスでランダム自己対戦・データ出力（`dataset.bin` 追記方式を標準化）
+2. `SelfPlay`クラスで自己対戦・データ出力（`dataset.bin` 追記方式を標準化）
 
 #### Phase 2: Python側MVP
 3. `dataset.py`で`dataset.bin`を読み込み、PyTorch Dataset化
@@ -104,8 +118,8 @@
 8. wandbで実験条件と結果を一元管理
 
 #### Phase 4: インターフェース拡張・統合強化
-9. pybind11やONNX等による連携方式を検討（必要に応じて）
-10. 「自己対戦 → 学習 → モデル更新 → 対戦評価」の自動サイクルを構築
+9. pybind11によるC++エンジンPythonラッパーを実装
+10. pybind経由で「自己対戦 → 学習 → モデル更新 → 対戦評価」の自動サイクルを構築
 
 ---
 
@@ -114,8 +128,12 @@
 - ai/cpp/include/BitBoard.hpp … ビットボードクラス定義
 - ai/cpp/include/SelfPlay.hpp … 自己対戦クラス定義
 - ai/cpp/src/ … 実装
+- ai/cpp/src/pybind_module.cpp … pybind11モジュール実装
 - ai/python/dataset.py … データ読み込み
 - ai/python/train.py … 学習スクリプト
+- ai/python/engine.py … pybindラッパー
+- ai/python/phase4_autoloop.py … pybindベース自動学習ループ
+- ai/python/build_cpp_engine.py … pybindビルドスクリプト
 - ai/data/dataset.bin … 学習用単一バイナリデータ
 - ai/requirements.md … 本要件・設計方針
 
