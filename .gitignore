@@ -1,1 +1,12 @@
 memo*
+*.log
+*.bin
+.env
+.spec-workflow
+wandb/
+lightning_logs/
+
+**/build/
+**/target/
+**/bin/
+**/__pycache__/

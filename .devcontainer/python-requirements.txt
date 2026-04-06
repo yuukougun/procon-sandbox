@@ -1,0 +1,8 @@
+numpy
+pybind11
+wandb
+torch
+scikit-learn
+pytorch-lightning
+tensorboard
+ax-platform
