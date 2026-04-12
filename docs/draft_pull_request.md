@@ -16,9 +16,16 @@
 ## Draft-Pull-Requestの方法
 <!-- END-NAVIGATION -->
 
-ブランチを分け開発が終わってからpull requestを送る方法ではなく、
-ブランチを作成した段階でdraft pull requestを送り開発を始める。<br>
-pull requestに随時コメントし、共同者に今やっていること、できたことを共有する。
+このリポジトリでは、開発開始時点でDraft PRを作る運用を基本とする。
+
+## 目的
+
+- 進捗の見える化
+- 設計判断の履歴化
+- 途中レビューによる手戻り削減
+- 開発logの記録
+
+## 手順
 
 下図の状態から新しくfeatureブランチを作成し、開発する。<br>
 ![画像](/images/contributing/exp_pullrequest.png)
@@ -37,4 +44,3 @@ featureブランチにmainブランチをマージし、最新の状態を取り
 mainブランチにfeatureブランチをマージする。<br>
 mainブランチが更新されていたら再び最新のmainブランチをマージしてからfeatureブランチをマージする。<br>
 ![画像](/images/contributing/exp_pullrequest_after.png)
-
