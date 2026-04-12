@@ -16,44 +16,140 @@
 ## ディレクトリ構成
 <!-- END-NAVIGATION -->
 
-```
+このリポジトリは、実装コードと開発基盤を同じ場所で運用する構成です。  
+特に `C++ / Python / Rust` を横断して開発するための設定ファイル群を重視しています。
+
+## 主要ディレクトリ
+
+```text
 REPOSITORY
-├── .github
-│   └── workflows
-|       ├── test.yml      # pull request時にtesterを実行し、コメント
-|       ├── linter.yml    # pull request時にリンターを実行し、コメント
-│       └── docs-pages.yml # Doxygen/Sphinxで生成したドキュメントをpagesにデプロイ
-├── .vscode
-│   ├── settings.json   # 設定ファイル
-│   ├── extensions.json # 推奨拡張機能のリスト
-│   └── c_cpp_properties.json   # コンパイラ設定ファイル
+├── .devcontainer/                  # Dev Containerの定義
+│   ├── generic/devcontainer.json   # 通常開発環境（GPUなし）
+│   ├── nvidia/devcontainer.json    # AI開発環境（GPUあり）
+│   ├── Dockerfile                  # generic/nvidia共通のイメージ定義
+│   ├── CreateCommand               # コンテナ起動後の初期設定
+│   ├── apt-packages.txt            # apt導入パッケージ一覧
+│   ├── python-requirements.txt     # Python依存一覧
+│   ├── rustup-components.txt       # Rust component一覧
+│   ├── rustup-targets.txt          # Rust target一覧
+│   └── cargo-tools.txt             # cargo installするツール一覧
 │
-├── library             # すべてのライブラリのフォルダ 
-│   └── LIBRARY_DESIGN.md       # ライブラリの設計仕様 
-├── solve               # 問題のsolveファイルのフォルダ
-│   ├── solve.cpp       # solveファイル
-│   ├── util.hpp        # soleファイルの補助ライブラリ
-│   └── parameters.hpp  # パラメータファイル
-├── input               # inputデータのフォルダ
-├── output              # outputデータのフォルダ
-├── server              # サーバーやpc間の連携を行うフォルダ
-├── visualizer          # 回答データや分析結果の可視化
-│   └── analysis        # 回答データを分析したデータのフォルダ
-├── tester              # 関数やクラスの実行テストフォルダ
-│   └── testAll.py      # すべてのテストを行うファイル
-├── diagrams            # 設計図のフォルダ
-│   └── design.drawio   # ライブラリやワークフローの設計図
-├── images              # Readmeに記す画像のフォルダ
+├── .vscode/                        # エディタ・開発体験の調整
+│   ├── c_cpp_properties.json       # インクルードパス
+│   └── mcp.json                    # MCP設定
 │
+├── .github/
+│   ├── workflows/
+│   │   └── docs-pages.yml          # C++/Pythonドキュメントの自動公開
+│   ├── libraries.json              # ドキュメント公開対象ライブラリ定義
+│   └── scripts/
+│       ├── build_docs_site.py      # ドキュメント生成とデプロイの実装
+│       └── detect_library_changes.py # ライブラリ変更の検出
 │
-├── .gitignore          # リポジトリに含めないファイルの設定
-├── Doxyfile            # doxygenの設定ファイル
-├── Makefile            # リンカコンパイルの設定ファイル
-├── run.sh              # すべてのコマンド操作を行うファイル
-├── COMMAND.md          # run.shなどのコマンドの解説
-├── CONTRIBUTING.md     # 共同開発者にリポジトリのルールの解説
-└── README.md           # リポジトリの説明（使い方など）
+├── ai_learning/
+│   ├── cpp/                        # C++エンジン
+│   ├── python/                     # 学習・推論・連携スクリプト
+│   │   ├── system_name/            # 系統ごとにサブディレクトリ
+│   │   │   └── model_name/         # モデルごとにサブディレクトリ
+│   │   └── utils/                  # 共通のヘルパー関数、ロガー
+│   │
+│   ├── data/                       # 学習データ・モデル・ログ
+│   │   ├── raw/                    # 入手したままの不変データ
+│   │   └── processed/              # モデルに投入する最終的な学習用データ
+│   │       └── model_name/         # モデルごとにサブディレクトリ
+│   │
+│   └── models/                     # 学習済みモデルの保存先
+│       └── model_name/             # モデルごとにサブディレクトリ
+│           ├── best_model.pth      # ベストモデルファイル
+│           ├── best_model.onnx     # ベストモデルのONNX形式ファイル
+│           ├── best_model.json     # ベストモデルのバージョン情報
+│           ├── model_registry.jsonl # 全てのバージョンのモデル情報を記録
+│           └── model_version/      # モデルバージョンごとにサブディレクトリ
+│               ├── model.ckpt      # 学習済みモデルファイル
+│               ├── training_log.jsonl # 学習ログ（例: 再開学習の記録）
+│               └── config.json     # モデルの設定ファイル
+│
+├── library/                        # 共通ライブラリ（C++/Python/Rust）
+│   ├── cpp/
+│   │   ├── include/                # ヘッダ
+│   │   │   └── library_name/       # ライブラリごとにサブディレクトリ
+│   │   │       └── file_name.hpp   # ヘッダファイル
+│   │   ├── src/                    # ソース
+│   │   │   └── library_name/       # ライブラリごとにサブディレクトリ
+│   │   │       └── file_name.cpp   # ソースファイル
+│   │   └── bin/                    # ビルド成果物（例: 静的ライブラリ）
+│   │       └── library_name/       # ライブラリごとにサブディレクトリ
+│   │           └── file_name.o     # ソースファイル
+│   ├── python/
+│   │   └── package_name/           # Pythonパッケージ
+│   │       ├── __init__.py         # パッケージ定義
+│   │       ├── module_name.py      # モジュールファイル
+│   │       └── subpackage/         # パッケージ内のサブパッケージ
+│   │           ├── __init__.py     # サブパッケージ定義
+│   │           └── module_name.py  # サブモジュールファイル
+│   │
+│   └── rust/
+│       └── crate_name/             # Rustクレート
+│           ├── src/                # ソース
+│           │   └── lib.rs          # クレートのエントリポイント
+│           └── Cargo.toml          # クレート定義
+│
+├── data/
+│   ├── problems/                   # 問題データ
+│   │   ├── problem_id/             # 問題ごとにサブディレクトリ
+│   │   │   └── problem.json        # 問題ファイル
+│   │   ├── benchmark/              # ベンチマーク用の問題セット
+│   │   └── generate/               # 問題生成プログラム
+│   └── answers/                    # 解答データ
+│       └── solution_name/          # 解法ごとにサブディレクトリ
+│           └── version_name/       # バージョンごとにサブディレクトリ
+│               ├── problem_id/     # 問題ごとにサブディレクトリ
+│               │   ├── answer.json # 解答ファイル
+│               │   └── metadata.json # 問題のメタデータ
+│               └── benchmark.json  # ベンチマークのスコア
+│
+├── solver/                         # 問題解決コード
+│   └── solution_name/              # 解法ごとにサブディレクトリ
+│       ├── solve.cpp               # 解法の実装
+│       ├── parameters.hpp          # 解法のパラメータ設定
+│       ├── utils/                  # 解法内で使うユーティリティコード
+│       └── bin/                    # 解法のビルド成果物
+│
+├── diagrams/                       # 設計図（drawio）
+│   └── ai_learning/                # AI学習関連の設計図
+├── images/                         # ドキュメント用画像
+│
+├── docs/                           # 開発ルールと運用手順
+│   ├── _navigation.md              # 目次定義（正本）
+│   ├── git-hooks/pre-commit        # docs更新時の自動生成フック
+│   └── script/gen-contribut        # CONTRIBUTING.md生成
+├── CONTRIBUTING.md                 # docsから自動生成される統合ガイド
+│
+├── visualizer/                     # Desktop可視化クレート（eframe試作）
+├── server/                         # 大会サーバー、他pcとの通信
+├── tester/                         # 既存プログラムの動作確認
+├── benchmark/                      # 回答のベンチマーク
+│
+├── MakeFile                        # コマンド集約
+│
+├── .env                            # devcontainer実行時の環境変数
+├── .env.example                    # .envのテンプレート
+├── .dockerignore                   # Docker build時の除外定義
+├── .gitignore                      # git管理から除外するファイル定義
+├── Cargo.toml                      # Rust workspaceルート
+│
+└── README.md                        # プロジェクト概要
 ```
+
+## 構成
+
+この章では、上のディレクトリ構成を「共同開発でどう使うか」の観点で説明します。  
+特に、新規参加者が最初に迷いやすいポイント（実装場所・設定場所・運用場所）を明確化します。
+
+> 補足: この構成はテンプレートとしての推奨形を含みます。  
+> 実際の運用リポジトリで名称が異なる場合は、役割を優先して読み替えてください。
+
+## フォルダ詳細
 
 > ### `docs-pages.yml`ファイル
 > libraryフォルダやpythonライブラリで定義したクラスや関数を **`doxygen`** / **`sphinx`** でドキュメンテーション化し、 **`github pages`** に自動デプロイする。<br>
@@ -62,57 +158,30 @@ REPOSITORY
 
 > ### `library`フォルダ
 > - ドキュメンテーションコメントを書く。**`（処理の説明ではなく、使い方の説明）`**<br>
-> - solveで使用するc++のクラスや関数をまとめる。<br>
-> - 関数には **`inline`** をつけてリンクできるようにする<br>
-> - serverやvisualizerのpythonライブラリを作る場合は **`library / pythonフォルダ`** 内に置く。<br>
-> - ライブラリを作成する前にLIBRARY_DESIN.mdに設計仕様をまとめ、計画的にクラスを作成する。 **`（他の人と相談しながらがいい）`**<br>
 > - **`umbrella header`** を作成し、一括includeできるようにする。<br>
 > - #pragma onceを用いて **`インクルードガード`** する。
+> - 大幅な変更は過去のコードにバグを生む可能性があるため、ファイルにバージョンをつける。<br>
 >
 >---
 > #### ライブラリ作成の注意
 > - 名前は長くていいから絶対に **`今後被らないような名前`** にする。（名前の定義ルールは[こちら](#名前の定義ルール)）<br>
-> - ライブラリファイルは **`基本変更しない`** ような設計にする。（パラメータ値はsolveフォルダ内に書きincludeするか、引数で渡す）<br>
-> - 例外処理か、エラー出力を行う。エラー出力では内部データを出力し、**`デバックしやすくする`**。<br>
-> - 右辺値や左辺値、constを意識して **`無駄なコピー`** が発生しないようなクラスにする。<br>
 > - 役割ごとに **`namespace`** を分割し、一つのファイルに多くのクラスや関数を定義しない。<br>
-> - クラス内に構造体が必要になったら **`クラス内に書く`** 。<br>
-> - クラス内のメンバ変数はpublicにせず、getterやsetterでやり取りする。<br>
-> - 同じ関数でも引数を変えてオーバーライドし、様々な状況で使いやすくする。<br>
-> - templateを用いて柔軟なクラスにする。（競技のデータ構造による）<br>
-> - conceptやrequiresを用いて **`templateの型を制限する`**。<br>
-> - コンストラクタには基本 **`explicit`** をつけ、暗黙の型変換を防止する。<br>
-> - コンパイル時に計算できる可能性のある関数は基本 **`contexpr`** をつける。<br>
-> - 右辺値参照する場合 **`noexcept`** をつける。（例外を投げる可能性があるなら書かない）
 >
 > クラスの基本的な設計は[こちら](#基本的なクラス設計)
 
-> ### `solve`フォルダ
-> 大まかな解法ごとにフォルダをネストさせる。<br>
-> 処理ごとにutil.hppでファイルを分け、includeする。（ライブラリフォルダではなくsolveフォルダに入れる）<br>
+> ### `solver`フォルダ
 > 似た解法のsolve.cppを作るときは同じutil.hppをincludeして **`共通の処理`** を一つのファイルで管理<br>
 > 処理ごとに関数に分け、関数の役割を分散する。<br>
 > パラメータはsolveファイルに書かず、hppに分け、定数値として定義する。
 
-
-> ### `server`フォルダ
-> 大会サーバーやpc間の通信処理はここで行う。<br>
-> guiのボタンで簡単に操作できるようにする。
-
-> ### `visualizer`フォルダ
-> 回答データや分析データをguiで可視化する。<br>
-> 結果だけの表示ではなく **`途中過程`** でどういった操作が行われたかを可視化する。<br>
-> run.shと被るが、solveを実行しそれぞれの入力例を選択できるようにすると便利
-
 > ### `tester`フォルダ
-> コンパイルできるか、関数やクラスが適切な値を返すか、短時間で確認できるテストを試す。<br>
-> push時などにtest.ymlを実行し、動作確認を行う。<br>
-> テスト方法は要検討
+> コンパイルできるか、関数やクラスが適切な値を返すかを確認する。<br>
+> push時などにci.ymlを実行し、動作確認を行う。<br>
+> testerコードはtesterフォルダ内に置き、ローカル環境でも動かせるようにする。
 
-> ### `analysis`フォルダ
-> 回答データを分析し、推移や解法ごとの分析データを保存する<br>
-> 状態変化をgifとして保存するのもあり
+> ### `benchmark`フォルダ
+> 解答のスコアを測定する。
 
-> ### `run.sh`ファイル
+> ### `Makefile`ファイル
 > ファイルのコンパイルや実行などターミナルで実行するコマンド処理は全てこれで行う。（gitコマンドは除く）<br>
-> makefileでオブジェクトファイルの作成やリンクもこれで行う。
+> オブジェクトファイルの作成やリンクもこれで行う。
