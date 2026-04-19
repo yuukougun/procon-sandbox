@@ -1,9 +1,11 @@
 {
-    // "recommendations": [
-    //     "ms-vscode.cpptools",
-    //     "mhutchie.git-graph",
-    //     "hediet.vscode-drawio",
-    //     "github.codespaces",
-    //     "github.vscode-pull-request-github"
-    // ]
+    "recommendations": [
+        "ms-python.python",
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "mhutchie.git-graph",
+        "hediet.vscode-drawio",
+        "github.codespaces",
+        "github.vscode-pull-request-github"
+    ]
 }
