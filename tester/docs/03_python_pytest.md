@@ -1,165 +1,151 @@
-# 03. Python テスター実装ガイド (pytest)
+# 03. Python テスト (pytest)
 
-この章では、Python の tester を追加・保守できるように詳細に説明します。
+この章では、Python テスターを追加・実行・運用する流れを説明します。
 
-## 1. 現在のテスト対象
+## 1. 対象ファイル
 
-対象実装:
-
-- `library/library.py`
-- クラス `Array`
-
-主な仕様:
-
-- `size()` と `__len__()` がサイズを返す
-- `allocate()` で再確保
-- `clear()` で空配列化
-- 添字範囲外は `IndexError`
-- `copy()` はディープコピー
+- 実装対象（例）: `library/library.py`
+- テストファイル（例）: `tester/python/unit/library/test_array.py`
+- 共通設定: `tester/python/conftest.py`
 
 ---
 
-## 2. pytest の検出ルール
+## 2. 現在の import 方式
 
-VS Code / pytest は基本的に以下を検出対象にします。
+`tester/python/conftest.py` が pytest 起動時に import ルートを設定します。
 
-- ファイル名が `test_*.py`
-- 関数名が `test_*`
+基本方針:
 
-現在ファイル:
+- まずリポジトリルートを `sys.path` へ追加
+- `TESTER_EXTRA_PYTHONPATH` で追加ルートを拡張
 
-- `tester/python/test_array.py`
-
----
-
-## 3. import 設定の理由
-
-`test_array.py` 冒頭で次を実施しています。
-
-```python
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-```
-
-理由:
-
-- テストファイルの位置は `tester/python`
-- 対象モジュールは `library/library.py`
-- 相対 import 崩れを防ぐため、リポジトリルートをパスに追加
-
-実行側でも `PYTHONPATH=.` を併用しているため、CLI / VS Code 双方で安定しやすいです。
-
----
-
-## 4. 現在のテストケース解説
-
-## 4.1 test_constructor_and_size
-
-- 入力: size = 0, 1, 8
-- 観点: コンストラクタの初期サイズ整合
-
-## 4.2 test_element_access
-
-- 入力: (size, factor) を複数組
-- 観点: `[]` と `at()` の読み書き整合
-
-## 4.3 test_copy_is_deep_copy
-
-- 観点: コピー後に片方を書き換えても元が変わらないこと
-
-## 4.4 test_allocate_and_clear
-
-- 観点: `allocate()` と `clear()` のサイズ遷移
-
-## 4.5 test_invalid_index_raises_index_error
-
-- 観点: 負数添字・範囲外添字で例外が出ること
-
----
-
-## 5. パラメータ化テストの書き方
-
-基本形:
-
-```python
-@pytest.mark.parametrize("x", [0, 1, 2])
-def test_example(x):
-    assert x >= 0
-```
-
-複数引数:
-
-```python
-@pytest.mark.parametrize(
-    ("a", "b"),
-    [
-        (1, 2),
-        (3, 4),
-    ],
-)
-def test_example_pair(a, b):
-    assert a < b
-```
-
----
-
-## 6. 新しい Python テストを追加する手順
-
-1. `tester/python/test_<対象>.py` を作る
-2. `from library.<module> import <symbol>` を書く
-3. 正常系、境界値、異常系を分けて `test_*` を作る
-4. 重複入力は `@pytest.mark.parametrize` にまとめる
-5. `make test-py` で確認
-
-推奨観点:
-
-- 生成直後の初期状態
-- 代表値
-- 境界値 (0, 1, 最大近傍)
-- エラー入力
-- 参照共有バグ (ミュータブルなコピー)
-
----
-
-## 7. 実行コマンド
+例:
 
 ```bash
-# Python テストのみ
+export TESTER_EXTRA_PYTHONPATH="ai/python:python"
 make test-py
+```
 
-# 直接 pytest 実行
-PYTHONPATH=. pytest -q tester/python
+この設計により、将来 `library/` 以外に実装が増えても、テスト側を大きく書き換えずに対応できます。
 
-# 失敗詳細を確認
-PYTHONPATH=. pytest -vv tester/python
+---
+
+## 3. テストファイルの基本形
+
+```python
+import pytest
+from library.library import Array
+
+
+def test_example():
+    arr = Array(3, 0)
+    assert arr[0] == 0
+```
+
+命名規則:
+
+- ファイル名: `test_*.py`
+- 関数名: `test_*`
+
+---
+
+## 4. パラメータ化テスト
+
+同じロジックを複数条件で確認する場合:
+
+```python
+@pytest.mark.parametrize("size", [1, 2, 8])
+def test_array_size(size: int):
+    arr = Array(size, 0)
+    assert len(arr) == size
+```
+
+利点:
+
+- ケース追加が簡単
+- 失敗条件が明確
+- テスト重複を減らせる
+
+---
+
+## 5. 例外テスト
+
+境界外アクセスなどの異常系は `pytest.raises` で確認します。
+
+```python
+def test_out_of_bounds_raises() -> None:
+    arr = Array(2, 7)
+    with pytest.raises(IndexError):
+        _ = arr[2]
 ```
 
 ---
 
-## 8. よくある失敗と対処
+## 6. 実行方法
+
+### 6.1 CLI
+
+```bash
+make test-py
+```
+
+### 6.2 VS Code Testing View
+
+1. Python 拡張が有効な状態でワークスペースを開く
+2. Testing View を開く
+3. Python テストツリーから対象ケースを実行
+
+---
+
+## 7. 新しい Python テスト追加手順
+
+例: `ai/` 配下の Python 実装をテスト対象に追加する場合
+
+1. テスト配置先を作る
+
+```text
+tester/python/unit/ai/
+```
+
+2. `test_xxx.py` を追加
+
+3. 必要なら import ルートを環境変数で追加
+
+```bash
+export TESTER_EXTRA_PYTHONPATH="ai"
+```
+
+4. `make test-py` で実行
+
+5. Testing View で個別ケース実行
+
+---
+
+## 8. よくある失敗
 
 ### 8.1 ModuleNotFoundError
 
-- 原因: import パス不足
-- 対処:
-  - `PYTHONPATH=.` を付ける
-  - `sys.path` 追加処理を確認
+原因:
 
-### 8.2 VS Code でテストが表示されない
+- import ルートが不足
+- 実装ファイル構成と import 文が不一致
 
-- 原因: Python 拡張設定不足
-- 対処: `.vscode/settings.json` の pytest 設定確認
+対処:
 
-### 8.3 例外タイプが違う
+- まず `conftest.py` のルート設定を確認
+- 次に `TESTER_EXTRA_PYTHONPATH` を必要最小限で追加
 
-- 原因: 実装変更でエラー型が変化
-- 対処: 実装仕様に合わせて `pytest.raises` を更新
+### 8.2 テストが検出されない
+
+原因:
+
+- ファイル名が `test_*.py` になっていない
+- 関数名が `test_` で始まっていない
 
 ---
 
 ## 9. この章の完了条件
 
-- 1つの Python ライブラリに対して pytest ファイルを新規作成できる
-- パラメータ化と例外検証を使い分けできる
-- 失敗ログから修正方針を立てられる
+- 新規 Python テストを 1 ファイル追加できる
+- CLI と Testing View の両方で実行できる
+- import エラーを自力で切り分けできる

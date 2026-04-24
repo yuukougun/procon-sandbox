@@ -9,10 +9,16 @@ tester/
 ├── README.md
 ├── testAll.py
 ├── python/
-│   └── test_array.py
+│   ├── conftest.py
+│   └── unit/
+│       └── library/
+│           └── test_array.py
 ├── cpp/
 │   ├── CMakeLists.txt
-│   └── array_test.cpp
+│   ├── unit/
+│   │   └── library/
+│   │       └── array_test.cpp
+│   └── build/
 └── docs/
     ├── README.md
     ├── 01_prerequisites.md
@@ -26,33 +32,41 @@ tester/
 
 ## 2. 各ファイルの役割
 
-### 2.1 tester/python/test_array.py
+### 2.1 tester/python/conftest.py
+
+- pytest 起動時に共通の import パス設定を行う。
+- リポジトリルートを自動追加。
+- `TESTER_EXTRA_PYTHONPATH` で追加フォルダを動的に拡張可能。
+
+### 2.2 tester/python/unit/library/test_array.py
 
 - Python 実装 (`library/library.py`) を検証する pytest テスト。
 - 例外確認、境界値確認、コピーの独立性確認などを担当。
 
-### 2.2 tester/cpp/array_test.cpp
+### 2.3 tester/cpp/unit/library/array_test.cpp
 
 - C++ 実装 (`library/library.hpp`) を検証する GoogleTest テスト。
 - `TEST_P` と `INSTANTIATE_TEST_SUITE_P` でパラメータ化。
 - 必要に応じて `EXPECT_DEATH` で assert の動作を確認。
 
-### 2.3 tester/cpp/CMakeLists.txt
+### 2.4 tester/cpp/CMakeLists.txt
 
 - gtest の取得、ビルド設定、テストバイナリ生成を担当。
+- `*_test.cpp` を再帰的に探索し、階層化されたテストも自動収集する。
+- `TESTER_CPP_EXTRA_INCLUDE_DIRS` で include 対象を追加できる。
 - TestMate はこのバイナリを読んでテスト一覧表示する。
 
-### 2.4 Makefile
+### 2.5 Makefile
 
 - 開発者が統一コマンドでテストできるようにする入口。
 - CI でも同じ入口を使うことで「ローカルでは通るのに CI は失敗」を減らす。
 
-### 2.5 tester/testAll.py
+### 2.6 tester/testAll.py
 
 - Python から `make test-cpp` と `make test-py` を順番に呼ぶラッパー。
 - 実装や自動化ツールで Python 側から統合実行したいときに使う。
 
-### 2.6 .vscode/settings.json
+### 2.7 .vscode/settings.json
 
 - Python テストの検出条件を指定。
 - C++ TestMate の実行バイナリ探索パターンを指定。
@@ -61,7 +75,7 @@ tester/
 
 ## 3. 実行フロー
 
-## 3.1 ローカル CLI 実行フロー
+### 3.1 ローカル CLI 実行フロー
 
 1. `make test-cpp`
 2. CMake が `tester/cpp/build` を更新
@@ -70,11 +84,11 @@ tester/
 5. `make test-py`
 6. pytest が Python テスト実行
 
-## 3.2 VS Code Testing View 実行フロー
+### 3.2 VS Code Testing View 実行フロー
 
 Python:
 
-1. Python 拡張が `tester/python/test_*.py` を検出
+1. Python 拡張が `tester/python/**/test_*.py` を検出
 2. Testing View にケース表示
 3. ケース単位で実行
 
@@ -85,7 +99,7 @@ C++:
 3. テストケース一覧を表示
 4. ケース単位またはスイート単位で実行
 
-## 3.3 CI 実行フロー
+### 3.3 CI 実行フロー
 
 1. GitHub Actions が起動
 2. `make test-cpp` 実行
@@ -98,7 +112,8 @@ C++:
 
 依存の方向は次のようになります。
 
-- `library/*` は「テストされる対象」
+- `library/*` は「テストされる対象」の一例
+- `ai/*` や `python/*` など他フォルダでも同じ仕組みで対象化可能
 - `tester/*` は「検証コード」
 - `Makefile` は「実行導線」
 - `.vscode/*` は「開発体験の設定」
@@ -113,8 +128,8 @@ C++:
 
 現在の推奨運用は以下:
 
-- Python: pytest 形式を `tester/python` 配下へ追加
-- C++: GoogleTest 形式を `tester/cpp` 配下へ追加
+- Python: pytest 形式を `tester/python/<layer>/<category>/` 配下へ追加
+- C++: GoogleTest 形式を `tester/cpp/<layer>/<category>/` 配下へ追加
 - 実行は `make` と Testing View を中心に統一
 
 ---

@@ -30,8 +30,9 @@
 
 ## 現在の実装ファイル一覧
 
-- Python テスト実装: `tester/python/test_array.py`
-- C++ テスト実装: `tester/cpp/array_test.cpp`
+- Python 共通設定: `tester/python/conftest.py`
+- Python テスト実装: `tester/python/unit/library/test_array.py`
+- C++ テスト実装: `tester/cpp/unit/library/array_test.cpp`
 - C++ ビルド設定: `tester/cpp/CMakeLists.txt`
 - 一括実行: `Makefile`, `tester/testAll.py`
 - VS Code 設定: `.vscode/settings.json`, `.vscode/c_cpp_properties.json`

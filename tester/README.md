@@ -1,6 +1,8 @@
 # Tester
 
-`library` 配下の C++ / Python ライブラリの回帰テストを管理します。
+このフォルダは、C++ / Python ライブラリの回帰テストを管理します。
+
+`library` フォルダに限らず、将来的に他フォルダへ増えるライブラリもテストできる構成です。
 
 ## 詳細ドキュメント
 
@@ -17,8 +19,37 @@
 
 ## テスト配置
 
-- Python: `tester/python/test_array.py` (pytest)
-- C++: `tester/cpp/array_test.cpp` (Google Test)
+- Python: `tester/python/unit/library/test_array.py` (pytest)
+- C++: `tester/cpp/unit/library/array_test.cpp` (Google Test)
+
+推奨の階層テンプレート:
+
+```text
+tester/
+├── python/
+│   ├── conftest.py
+│   ├── unit/
+│   │   ├── library/
+│   │   ├── ai/
+│   │   └── python/
+│   └── integration/
+│       ├── library/
+│       └── ai/
+└── cpp/
+	├── CMakeLists.txt
+	├── unit/
+	│   ├── library/
+	│   ├── ai/
+	│   └── python/
+	└── integration/
+		├── library/
+		└── ai/
+```
+
+命名の目安:
+
+- Python: `test_*.py`
+- C++: `*_test.cpp`
 
 ## ローカル実行
 
@@ -26,6 +57,30 @@
 - Python テスト: `make test-py`
 - 全体テスト: `make test`
 - ラッパー実行: `python3 tester/testAll.py`
+
+## ライブラリ配置が増えた場合の対応
+
+Python:
+
+- `tester/python/conftest.py` がリポジトリルートを import パスに追加します。
+- 追加の import ルートが必要なら環境変数 `TESTER_EXTRA_PYTHONPATH` を使います。
+
+例:
+
+```bash
+TESTER_EXTRA_PYTHONPATH="ai:python/custom_lib" make test-py
+```
+
+C++:
+
+- `tester/cpp/CMakeLists.txt` で `PROJECT_ROOT` と `PROJECT_ROOT/library` を include 対象にします。
+- 追加 include が必要なら環境変数 `TESTER_CPP_EXTRA_INCLUDE_DIRS` を使います。
+
+例:
+
+```bash
+TESTER_CPP_EXTRA_INCLUDE_DIRS="/workspaces/procon-sandbox/ai/cpp/include:/workspaces/procon-sandbox/custom/include" make test-cpp
+```
 
 ## VS Code Testing View での確認
 

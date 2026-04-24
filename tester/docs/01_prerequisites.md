@@ -43,10 +43,12 @@
 
 ### 2.2 import と PYTHONPATH
 
-- このプロジェクトではライブラリを `library/library.py` に置いている。
-- テストから import するために、以下のどちらかが必要:
-  - テスト内で `sys.path` にリポジトリルートを追加
-  - 実行時に `PYTHONPATH=.` を付与
+- このプロジェクトではライブラリが `library/` 以外へ増えることを想定している。
+- テストから import するために、以下を使う:
+  - 共通設定ファイル `tester/python/conftest.py`
+  - 必要に応じて `TESTER_EXTRA_PYTHONPATH` 環境変数
+
+`conftest.py` はまずリポジトリルートを import パスへ追加し、必要分だけ追加パスを環境変数で拡張する設計です。
 
 ---
 
@@ -62,7 +64,8 @@
 ### 3.2 CMake
 
 - C++ のビルド設定を記述するためのツール。
-- このプロジェクトでは CMake で gtest を取得し、テストバイナリを生成する。
+- このプロジェクトでは CMake で gtest を取得し、階層化された `*_test.cpp` を自動収集してテストバイナリを生成する。
+- 追加 include パスは `TESTER_CPP_EXTRA_INCLUDE_DIRS` で拡張できる。
 
 ### 3.3 C++ TestMate
 
