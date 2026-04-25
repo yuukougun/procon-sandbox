@@ -16,6 +16,8 @@
 ## 名前の定義ルール
 <!-- END-NAVIGATION -->
 
+命名は「検索しやすさ」と「衝突しにくさ」を重視する。
+
 > ### 一般的な命名規則として５つに分類される。
 > 1. パスカルケース（MyName）
 > 2. キャメルケース（myName）
@@ -38,7 +40,7 @@
 > ブランチ名には'/'をつけることができる。<br>
 > ブランチ名の前にそのブランチの種類を書く（例：bugfix/library）<br>
 > 大きなプロジェクトのブランチはmainを増設する。（例：visualizer/main）<br>
-> 例：visualizerでbuttonのバグを治すブランチは **`visualizer/bugifx/button`**
+> 例：visualizerでbuttonのバグを治すブランチは **`visualizer/bugfix/button`**
 > 
 > | 種類 | 命名規則 |
 > | --- | --- |
