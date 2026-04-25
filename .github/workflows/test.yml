@@ -1,0 +1,70 @@
+name: "Test Library (CPP/Python)"
+
+on:
+  push:
+    paths:
+      - "library/**"
+      - "tester/**"
+      - ".github/workflows/test.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cpp-test:
+    name: CPP Test (GoogleTest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show g++ version
+        run: g++ --version
+
+      - name: Run C++ tests
+        run: make test-cpp
+
+  python-test:
+    name: Python Test (pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show Python version
+        run: python --version
+
+      - name: Install pytest
+        run: pip install pytest
+
+      - name: Run Python tests
+        run: make test-py
+
+  all-tests:
+    name: All Tests Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - cpp-test
+      - python-test
+    if: always()
+
+    steps:
+      - name: Verify all required jobs succeeded
+        run: |
+          if [ "${{ needs.cpp-test.result }}" != "success" ] || [ "${{ needs.python-test.result }}" != "success" ]; then
+            echo "At least one required test job failed."
+            exit 1
+          fi
+          echo "Both C++ and Python tests passed."
