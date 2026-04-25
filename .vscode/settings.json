@@ -1,14 +1,21 @@
 {
-    // // オートセーブ
-    // "files.autoSave": "onFocusChange",
-
-    // // git graphでtagの表示
-    // "git-graph.repository.showTags": true,
-    // // git fetch時にすべてfetchする
-    // "git.autofetch": "all",
-    // "git.autofetchPeriod": 180,
-
-    // "[markdown]": {
-    //     "editor.wordWrap" : "off"
-    // }
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        ".pytest_cache": true,
+        ".spec-workflow": true,
+        "diagrams": true,
+        "images": true,
+        "lightning_logs": true,
+        "target": true,
+        "wandb": true,
+        ".env": true,
+        "solve": true,
+        "visualizer": true,
+        "docker": true,
+        "ai": true
+    }
 }
