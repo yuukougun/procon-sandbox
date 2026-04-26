@@ -8,7 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PROJECT_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
 set(
-    TESTER_CPP_INCLUDE_DIRS
+    LIBRARY_DIRS
     "${PROJECT_ROOT_DIR}"
     "${PROJECT_ROOT_DIR}/library"
     CACHE STRING "Semicolon-separated include directories for headers under test"
@@ -26,22 +26,28 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-file(GLOB_RECURSE TESTER_CPP_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*_test.cpp")
-list(FILTER TESTER_CPP_SOURCES EXCLUDE REGEX "/build/")
+file(GLOB_RECURSE TEST_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/unit/*_test.cpp")
+list(FILTER TEST_FILES EXCLUDE REGEX "/build/")
 
-if(NOT TESTER_CPP_SOURCES)
+if(NOT TEST_FILES)
     message(FATAL_ERROR "No C++ test files found under ${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
-add_executable(cpp_test ${TESTER_CPP_SOURCES})
-
-target_include_directories(cpp_test PRIVATE
-    ${TESTER_CPP_INCLUDE_DIRS}
-)
-
-target_link_libraries(cpp_test PRIVATE
-    GTest::gtest_main
-)
-
 include(GoogleTest)
-gtest_discover_tests(cpp_test)
+
+foreach(test_source ${TEST_FILES})
+    get_filename_component(test_name ${test_source} NAME_WE)
+
+    # Build one executable per test source. Library .cpp files are not linked here.
+    add_executable(${test_name} ${test_source})
+
+    target_include_directories(${test_name} PRIVATE
+        ${LIBRARY_DIRS}
+    )
+
+    target_link_libraries(${test_name} PRIVATE
+        GTest::gtest_main
+    )
+
+    gtest_discover_tests(${test_name})
+endforeach()
