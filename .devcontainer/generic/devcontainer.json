@@ -74,7 +74,7 @@
 				"python.testing.pytestEnabled": true,
 				"python.testing.unittestEnabled": false,
 				"python.testing.pytestArgs": [
-					"tester/python/"
+					"--rootdir", "${workspaceFolder}/tester/python/unit"
 				],
 				"python.testing.cwd": "${workspaceFolder}",
 				"python.analysis.extraPaths": [

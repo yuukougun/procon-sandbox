@@ -4,8 +4,12 @@
 
 ## テスト配置
 
-- Python: `tester/python/test_array.py` (pytest)
-- C++: `tester/cpp/array_test.cpp` (Google Test)
+- Python: `tester/python/unit/library/test_array.py` (pytest)
+- Python: `tester/python/unit/library/test_sample_math.py` (pytest)
+- C++: `tester/cpp/unit/library/array_test.cpp` (Google Test)
+- C++: `tester/cpp/unit/library/sample_math_test.cpp` (Google Test)
+
+両言語とも、1つのクラス・関数を複数パラメータで検証するパラメータ化テストを基本とします。
 
 ## ローカル実行
 
