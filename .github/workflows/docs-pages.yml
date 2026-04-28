@@ -18,13 +18,15 @@ concurrency:
 
 jobs:
   detect-library-changes:
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.detect.outputs.should_run }}
       reason: ${{ steps.detect.outputs.reason }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -42,12 +44,14 @@ jobs:
           --current-sha "$CURRENT_SHA"
 
   build-docs:
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     needs: detect-library-changes
     if: needs.detect-library-changes.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -88,6 +92,8 @@ jobs:
           path: site
 
   deploy:
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     if: needs.detect-library-changes.outputs.should_run == 'true'
     environment:
       name: github-pages

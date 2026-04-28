@@ -10,3 +10,5 @@ lightning_logs/
 **/target/
 **/bin/
 **/__pycache__/
+
+.vscode/settings.json

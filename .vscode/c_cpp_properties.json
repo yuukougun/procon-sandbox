@@ -3,7 +3,10 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**",
+                "${workspaceFolder}",
+                "${workspaceFolder}/library",
+                "${workspaceFolder}/tester/cpp",
+                "${workspaceFolder}/tester/cpp/build/_deps/googletest-src/googletest/include",
                 "/home/dev/.venv/lib/python3.10/site-packages/pybind11/include",
                 "/usr/include/python3.10"
             ],
@@ -11,7 +14,9 @@
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",
             "cppStandard": "gnu++20",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "linux-gcc-x64",
+            "compileCommands": "tester/cpp/build/compile_commands.json",
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4
