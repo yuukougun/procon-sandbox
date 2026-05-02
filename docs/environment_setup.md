@@ -63,7 +63,8 @@
 > ### 3. git pushを行えたら成功
 >
 > ### gitの設定
-> 以下のコマンドを実行し、設定すると便利
+> 以下のコマンドを実行し、設定すると便利<br>
+> **`user.name`** と **`user.email`** は必須
 > 
 > ```bash
 > git config --global user.name "Your Name"
@@ -74,6 +75,4 @@
 > git config --global merge.conflictstyle diff3
 > ```
 > 
-> **`git config --global --list`**で設定一覧を表示できる。
-
-## 6. 動作確認
+> **`git config --global --list`** で設定一覧を表示できる。
