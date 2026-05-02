@@ -1,3 +1,16 @@
+<!-- BEGIN-NAVIGATION -->
+# 目次 [home](/docs/tester-docs/README.md)
+- [1. 前提知識](/docs/tester-docs/01_prerequisites.md)
+- [2. アーキテクチャ](/docs/tester-docs/02_architecture.md)
+- [3. Python pytest](/docs/tester-docs/03_python_pytest.md)
+- [4. C++ GoogleTest + C++ TestMate](/docs/tester-docs/04_cpp_gtest_testmate.md) - now
+- [5. ゼロからの実装](/docs/tester-docs/05_implementation_from_scratch.md)
+- [6. 運用とCI](/docs/tester-docs/06_operations_ci.md)
+- [7. トラブルシューティング](/docs/tester-docs/07_troubleshooting.md)
+
+## 4. C++ GoogleTest + C++ TestMate
+<!-- END-NAVIGATION -->
+
 # 04. C++ テスト (GoogleTest + C++ TestMate)
 
 この章では、C++ 側テスターを「CMake でビルドし、C++ TestMate で運用する」流れを解説します。

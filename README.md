@@ -50,9 +50,9 @@
 - フック: `docs/git-hooks/pre-commit`
 - `docs/`配下にステージ済み変更がある場合、`docs/script/gen-contribut` を実行
 - `gen-contribut` が行う処理
-  - 各ドキュメントの`BEGIN-NAVIGATION`〜`END-NAVIGATION`に共通目次を再生成
+  - `docs/`配下の`_navigation.md`を再帰的に探索し、各ドキュメントの`BEGIN-NAVIGATION`〜`END-NAVIGATION`に目次を再生成
   - `docs/_navigation.md`順に複数ドキュメントを集約し、`CONTRIBUTING.md`を自動生成
-  - 生成結果を再ステージ（`docs/*.md`, `CONTRIBUTING.md`）
+  - 生成結果を再ステージ（`docs/**/*.md`, `CONTRIBUTING.md`）
 
 「分散したドキュメント編集」と「最終的な参照導線」を自動で同期できる運用です。
 
