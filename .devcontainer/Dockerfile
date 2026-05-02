@@ -83,6 +83,6 @@ RUN python -m venv /home/${USERNAME}/.venv \
 # 仮想環境を優先し、必要に応じて .local/bin も利用可能にする。
 ENV PATH=/home/${USERNAME}/.venv/bin:/home/${USERNAME}/.local/bin:${PATH}
 
-WORKDIR /workspaces/procon-sandbox
+WORKDIR /workspaces
 SHELL ["/bin/bash", "-c"]
 CMD ["bash"]
