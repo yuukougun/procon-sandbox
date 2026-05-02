@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# ドキュメントが更新されたことを検知し実行
 if git diff --cached --name-only | grep "^docs/" > /dev/null; then
     echo "CONTRIBUTING.mdの生成"
 
