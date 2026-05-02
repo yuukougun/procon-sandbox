@@ -1,70 +1,140 @@
-# リポジトリのパス
+#!/usr/bin/env bash
+set -euo pipefail
+
 REPO_ROOT=$(git rev-parse --show-toplevel)
+ROOT_NAV="${REPO_ROOT}/docs/_navigation.md"
 
-# contributing.md の tmpファイル
-contribut_tmp=$(mktemp)
-trap 'rm -f "$contribut_tmp"' EXIT
+if [[ ! -f "$ROOT_NAV" ]]; then
+    echo "docs/_navigation.md が見つかりません。" >&2
+    exit 1
+fi
 
-echo "<!-- このファイルは自動生成されるものです。書き換えても内容は破棄されます。-->" > "$contribut_tmp"
-echo -e "# proconでのリポジトリの使い方\n" >> "$contribut_tmp"
-cat docs/_navigation.md >> "$contribut_tmp"
+tmp_files=()
+cleanup() {
+    if ((${#tmp_files[@]} > 0)); then
+        rm -f "${tmp_files[@]}"
+    fi
+}
+trap cleanup EXIT
 
-# 目次の上から順にcontributing.mdに書き込み
-awk -F'[()]' '/-/ {print $1 ":" $2}' docs/_navigation.md | while read file
-do
-    # ドキュメントの名前とファイルパスの取得
-    IFS=: read -r doc_name doc_path <<< "$file"
-    doc_name=${doc_name:3:${#doc_name}-4}
-    doc_path="${REPO_ROOT}${doc_path}"
+parse_nav_entries() {
+    local nav_file="$1"
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^-\ \[(.+)\]\((.+)\) ]]; then
+            printf "%s\t%s\n" "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
+        fi
+    done < "$nav_file"
+}
 
-    # _navigation.md の tmpファイル
-    nav_tmp=$(mktemp)
-    trap 'rm -f "$nav_tmp"' EXIT
-
-    cat docs/_navigation.md > "$nav_tmp"
-    sed -i "/$doc_name/s/$/ - now/" "$nav_tmp"
-    echo -e "\n## $doc_name" >> "$nav_tmp"
-
-    # 各ドキュメントに目次を追加
-    doc_tmp=$(mktemp)
-    trap 'rm -f "$doc_tmp"' EXIT
-    awk -v nav="$nav_tmp" '
-    /BEGIN-NAVIGATION/ {
+mark_current_doc() {
+    local nav_file="$1"
+    local target_doc_name="$2"
+    awk -v target="$target_doc_name" '
+    /^- \[/ {
+        line = $0
+        sub(/^- \[/, "", line)
+        split(line, pieces, /]\(/)
+        if (pieces[1] == target) {
+            print $0 " - now"
+            next
+        }
+    }
+    {
         print
-
-        system("cat " nav)
-
-        skip=1
-        next
     }
+    ' "$nav_file"
+}
 
-    /END-NAVIGATION/ {
-        skip=0
-    }
+resolve_doc_path() {
+    local rel_path="$1"
+    if [[ "$rel_path" = /* ]]; then
+        printf "%s%s\n" "$REPO_ROOT" "$rel_path"
+    else
+        printf "%s/%s\n" "$REPO_ROOT" "$rel_path"
+    fi
+}
 
-    !skip
-    ' "$doc_path" > "$doc_tmp"
+update_doc_navigation() {
+    local nav_file="$1"
+    while IFS=$'\t' read -r doc_name doc_rel_path; do
+        [[ -z "${doc_name:-}" || -z "${doc_rel_path:-}" ]] && continue
 
-    mv "$doc_tmp" "$doc_path"
+        local doc_path
+        doc_path=$(resolve_doc_path "$doc_rel_path")
+        if [[ ! -f "$doc_path" ]]; then
+            echo "スキップ: ドキュメントが見つかりません ($doc_rel_path)" >&2
+            continue
+        fi
 
-    # contributing.mdに追記
-    echo "" >> "$contribut_tmp"
-    cat << EOF >> "$contribut_tmp"
-<a id="$doc_name"></a>
-<details>
-<summary><span style="font-size:1.5em; font-weight:bold;">$doc_name</span></summary>
+        local nav_tmp doc_tmp
+        nav_tmp=$(mktemp)
+        doc_tmp=$(mktemp)
+        tmp_files+=("$nav_tmp" "$doc_tmp")
 
----
-EOF
+        mark_current_doc "$nav_file" "$doc_name" > "$nav_tmp"
 
-    sed -n '/END-NAVIGATION/,$p' $doc_path | sed '1d' >> $contribut_tmp
+        printf "\n## %s\n" "$doc_name" >> "$nav_tmp"
 
-    cat << EOF >> "$contribut_tmp"
-</details>
+        awk -v nav="$nav_tmp" '
+        /BEGIN-NAVIGATION/ {
+            print
+            while ((getline line < nav) > 0) {
+                print line
+            }
+            close(nav)
+            skip=1
+            next
+        }
+        /END-NAVIGATION/ {
+            skip=0
+        }
+        !skip
+        ' "$doc_path" > "$doc_tmp"
 
----
-EOF
+        mv "$doc_tmp" "$doc_path"
+    done < <(parse_nav_entries "$nav_file")
+}
 
+mapfile -t navigation_files < <(find "${REPO_ROOT}/docs" -type f -name "_navigation.md" | sort)
+for nav_file in "${navigation_files[@]}"; do
+    update_doc_navigation "$nav_file"
 done
 
-mv "$contribut_tmp" CONTRIBUTING.md
+contribut_tmp=$(mktemp)
+tmp_files+=("$contribut_tmp")
+
+{
+    echo "<!-- このファイルは自動生成されるものです。書き換えても内容は破棄されます。-->"
+    echo "# proconでのリポジトリの使い方"
+    echo
+    cat "$ROOT_NAV"
+} > "$contribut_tmp"
+
+while IFS=$'\t' read -r doc_name doc_rel_path; do
+    [[ -z "${doc_name:-}" || -z "${doc_rel_path:-}" ]] && continue
+
+    doc_path=$(resolve_doc_path "$doc_rel_path")
+    if [[ ! -f "$doc_path" ]]; then
+        echo "スキップ: ドキュメントが見つかりません ($doc_rel_path)" >&2
+        continue
+    fi
+
+    {
+        echo
+        echo "<a id=\"$doc_name\"></a>"
+        echo "<details>"
+        echo "<summary><span style=\"font-size:1.5em; font-weight:bold;\">$doc_name</span></summary>"
+        echo
+        echo "---"
+    } >> "$contribut_tmp"
+
+    sed -n '/END-NAVIGATION/,$p' "$doc_path" | sed '1d' >> "$contribut_tmp"
+
+    {
+        echo "</details>"
+        echo
+        echo "---"
+    } >> "$contribut_tmp"
+done < <(parse_nav_entries "$ROOT_NAV")
+
+mv "$contribut_tmp" "${REPO_ROOT}/CONTRIBUTING.md"
