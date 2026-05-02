@@ -4,19 +4,6 @@
 
 `library` フォルダに限らず、将来的に他フォルダへ増えるライブラリもテストできる構成です。
 
-## 詳細ドキュメント
-
-初心者向けに、前提知識から実装・運用・トラブルシュートまでをまとめています。
-
-- 入口: `tester/docs/README.md`
-- 前提知識: `tester/docs/01_prerequisites.md`
-- 全体構成: `tester/docs/02_architecture.md`
-- Python 実装: `tester/docs/03_python_pytest.md`
-- C++ 実装: `tester/docs/04_cpp_gtest_testmate.md`
-- ゼロから実装: `tester/docs/05_implementation_from_scratch.md`
-- 運用と CI: `tester/docs/06_operations_ci.md`
-- 障害対応: `tester/docs/07_troubleshooting.md`
-
 ## テスト配置
 
 - Python: `tester/python/unit/library/test_array.py` (pytest)
@@ -30,28 +17,46 @@
 tester/
 ├── python/
 │   ├── conftest.py
-│   ├── unit/
-│   │   ├── library/
-│   │   ├── ai/
-│   │   └── python/
-│   └── integration/
+│   └── unit/
 │       ├── library/
-│       └── ai/
+│       ├── ai/
+│       └── python/
 └── cpp/
 	├── CMakeLists.txt
-	├── unit/
-	│   ├── library/
-	│   ├── ai/
-	│   └── python/
-	└── integration/
-		├── library/
-		└── ai/
+	└── unit/
+	    ├── library/
+	    ├── ai/
+	    └── python/
 ```
 
 命名の目安:
 
 - Python: `test_*.py`
 - C++: `*_test.cpp`
+
+## ファイル設定の概要
+
+### Python: `tester/python/conftest.py`
+
+pytest の初期化ファイル。リポジトリルートを sys.path に加えて、import を簡単にします。
+
+役割:
+- リポジトリルート直下のモジュール（`library.python` など）を import できるようにする
+- 環境変数 `TESTER_EXTRA_PYTHONPATH` で追加の import パスを指定可能
+
+ファイル内の詳細は docstring とコメントを参照してください。
+
+### C++: `tester/cpp/CMakeLists.txt`
+
+GoogleTest と individual test executable 生成のセットアップ。
+
+役割:
+- `unit/*_test.cpp` を見つけてテストターゲットを生成
+- テストファイル1ファイル = 実行ファイル1つ
+- ライブラリ実装(.cpp)は CMake では直接リンクしない
+- テストソースが必要な .cpp を直接 `#include "library/cpp/xxx.cpp"` で取り込む
+
+ファイル内の詳細は CMake コメントを参照してください。
 
 ## ローカル実行
 
@@ -76,19 +81,12 @@ TESTER_EXTRA_PYTHONPATH="ai:python/custom_lib" make test-py
 C++:
 
 - `tester/cpp/CMakeLists.txt` で `PROJECT_ROOT` と `PROJECT_ROOT/library` を include 対象にします。
-- 追加 include が必要なら環境変数 `TESTER_CPP_EXTRA_INCLUDE_DIRS` を使います。
-
-例:
-
-```bash
-TESTER_CPP_EXTRA_INCLUDE_DIRS="/workspaces/procon-sandbox/ai/cpp/include:/workspaces/procon-sandbox/custom/include" make test-cpp
-```
+- テストソースが実装ファイル(.cpp)を必要とする場合は、テストファイル内で `#include "library/cpp/xxx.cpp"` として直接取り込みます。
 
 ## VS Code Testing View での確認
 
 1. Python 拡張 (`ms-python.python`) をインストールする。
-2. C++ TestMate 拡張 (`matepek.vscode-catch2-test-adapter`) をインストールする。
-3. CMake Tools 拡張 (`ms-vscode.cmake-tools`) をインストールする。
-4. コマンドパレットで `Python: Discover Tests` を実行する。
-5. コマンドパレットで `CMake: Configure` → `CMake: Build` を実行する。
-6. Testing View で pytest と C++ TestMate のテストを実行する。
+2. CMake Tools 拡張 (`ms-vscode.cmake-tools`) をインストールする。
+3. コマンドパレットで `Python: Discover Tests` を実行する。
+4. コマンドパレットで `CMake: Configure` を実行し、`CMake: Build` でビルドする。
+5. Testing View で pytest と CTest の結果を確認できます。
