@@ -7,6 +7,6 @@ if git diff --cached --name-only | grep "^docs/" > /dev/null; then
     bash docs/script/gen-contribut
 
     # 変更をステージング
-    git add docs/*.md
+    find docs -type f -name "*.md" -print0 | xargs -0 git add --
     git add CONTRIBUTING.md
 fi
