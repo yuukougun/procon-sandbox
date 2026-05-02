@@ -395,8 +395,9 @@ namespace test{
 > | git merge --continue | mergeの再開 |
 > |  |  |
 > | git push | 現在のブランチのローカルの変更内容をリモートに送信 |
-> | git push origin (ブランチ名) | (ブランチ名)のローカルの変更内容をリモートに送信 |
+> | git push (ブランチ名) | (ブランチ名)のローカルの変更内容をリモートに送信 |
 > | git push -u origin (ブランチ名) | リモートに(ブランチ名)を追加してpushする |
+> | git push origin -d (ブランチ名) | リモートの(ブランチ名)を削除 |
 > | git pull | 現在のブランチのリモートの変更内容をローカルに取り込む |
 > | git pull origin (ブランチ名) | (ブランチ名)のリモートの変更内容をローカルに取り込む |
 > | git pull --rebase | 自分のcommitを他人のcommitの後に変える |
@@ -431,10 +432,12 @@ namespace test{
 > | git restore (ファイル名) | (ファイル名)で編集した内容を破棄（超危険） |
 > | git restore . | すべてのファイルで編集した内容を破棄（超危険） |
 > |  |  |
-> | git reflog | git操作の状態履歴を表示 |
-> | git reset --soft HEAD~(個数) | 直近(個数)個のコミットをステージング状態に戻す（危険） |
+> | git reflog | git操作の状態履歴を表示（履歴の番号はこれで確認） |
+> | git reset --soft ORIGIN_HEAD | マージ、リベース、リセットの処理をもとに戻す（危険） |
 > | git reset --soft HEAD^ | 直近１個のコミットをステージング状態に戻す。（危険）|
-> | git reset --hard HEAD@{(番号)} | リポジトリを(番号)番目の状態に戻す（超危険） |
+> | git reset --soft HEAD~(個数) | 直近(個数)個のコミットをステージング状態に戻す（危険） |
+> | git reset --soft (コミット値) | (コミット値)の状態に戻す（危険） |
+> | git reset --soft HEAD@{(番号)} | リポジトリを(番号)番目の状態に戻す（危険） |
 > |  |  |
 > | git tag | タグの一覧を表示 |
 > | git tag -a (タグ名) -m "(タグのコメント)" | 直近のコミットにタグを付ける |
