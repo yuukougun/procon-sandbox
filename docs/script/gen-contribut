@@ -20,7 +20,7 @@ trap cleanup EXIT
 parse_nav_entries() {
     local nav_file="$1"
     while IFS= read -r line; do
-        if [[ "$line" =~ ^-\ \[(.+)\]\((.+)\) ]]; then
+        if [[ "$line" =~ ^[[:space:]]*-[[:space:]]\[(.+)\]\((.+)\)$ ]]; then
             printf "%s\t%s\n" "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
         fi
     done < "$nav_file"
@@ -30,9 +30,9 @@ mark_current_doc() {
     local nav_file="$1"
     local target_doc_name="$2"
     awk -v target="$target_doc_name" '
-    /^- \[/ {
+    /^[[:space:]]*- \[/ {
         line = $0
-        sub(/^- \[/, "", line)
+        sub(/^[[:space:]]*- \[/, "", line)
         split(line, pieces, /]\(/)
         if (pieces[1] == target) {
             print $0 " - now"
