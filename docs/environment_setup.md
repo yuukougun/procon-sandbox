@@ -12,6 +12,8 @@
 - [環境構築](/docs/environment_setup.md) - now
 - [リポジトリ設定](/docs/repo_settings.md)
 - [Dockerの使い方](/docs/docker_usage.md)
+    - [testerのドキュメント](/docs/tester-docs/README.md)
+    - [copilotのドキュメント](/docs/copilot-docs/github-copilot-cli-guide.md)
 
 ## 環境構築
 <!-- END-NAVIGATION -->
