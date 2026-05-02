@@ -391,6 +391,7 @@ namespace test{
 > | git add (ファイル名) | (ファイル名)をステージングする |
 > | git add . | すべてのファイルをステージングする |
 > | git commit -m (コミットメッセージ) | ステージングファイルをコミットする |
+> | git commit -n -m (コミットメッセージ) | pre-commitフックを実行せずにコミットする |
 > | git commit --amend -m (コミットメッセージ) | 直前のコミットメッセージを変更（ステージング状態は空にしておく） |
 > | git commit --allow-empty -m "空のコミット" | 空のコミットを作成する |
 > | git merge (ブランチ名) | (ブランチ名)を現在のブランチにマージ（mainにはpull requestする）|
