@@ -20,7 +20,9 @@
 ## テスト配置
 
 - Python: `tester/python/unit/library/test_array.py` (pytest)
+- Python: `tester/python/unit/library/test_sample_math.py` (pytest)
 - C++: `tester/cpp/unit/library/array_test.cpp` (Google Test)
+- C++: `tester/cpp/unit/library/sample_math_test.cpp` (Google Test)
 
 推奨の階層テンプレート:
 

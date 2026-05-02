@@ -1,0 +1,108 @@
+name: Build And Deploy Docs
+
+on:
+  push:
+    branches:
+      - main
+      - doxy
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  detect-library-changes:
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.detect.outputs.should_run }}
+      reason: ${{ steps.detect.outputs.reason }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes for configured libraries
+        id: detect
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          python .github/scripts/detect_library_changes.py \
+          --config .github/libraries.json \
+          --event-name "$EVENT_NAME" \
+          --before-sha "$BEFORE_SHA" \
+          --current-sha "$CURRENT_SHA"
+
+  build-docs:
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    needs: detect-library-changes
+    if: needs.detect-library-changes.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl graphviz
+
+      - name: Install Doxygen 1.14.0+
+        env:
+          DOXYGEN_VERSION: "1.14.0"
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/doxygen.tar.gz "https://www.doxygen.nl/files/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          tar -xzf /tmp/doxygen.tar.gz -C /tmp
+          sudo install -m 0755 "/tmp/doxygen-${DOXYGEN_VERSION}/bin/doxygen" /usr/local/bin/doxygen
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install sphinx
+
+      - name: Build documentation site
+        run: |
+          python .github/scripts/build_docs_site.py \
+            --config .github/libraries.json \
+            --output site
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    if: needs.detect-library-changes.outputs.should_run == 'true'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs:
+      - detect-library-changes
+      - build-docs
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

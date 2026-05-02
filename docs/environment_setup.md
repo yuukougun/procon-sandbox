@@ -16,6 +16,27 @@
 ## 環境構築
 <!-- END-NAVIGATION -->
 
+このプロジェクトは Dev Container 前提です。  
+まずコンテナを起動し、次にGitHub連携を設定してください。  
+コンテナを初めてビルドする際は数十分かかることがあります。
+
+> ### dockerの環境構築
+> ### 1. Docker Desktopをインストール
+> **`Docker Desktop`** の公式サイトは[こちら](https://www.docker.com/products/docker-desktop/)<br>
+> dockerを使用する際は **`Docker Desktop`** を起動する必要がある。<br>
+> 一回起動したら閉じても大丈夫<br>
+> 
+> ### 2. vscodeの拡張機能 Dev Container をインストール
+> Dev Containerの識別子は **`ms-vscode-remote.remote-containers`** なので検索欄に入れたら出てくる。<br>
+> vscodeなら左下の青い部分をクリックすることで **`コンテナで再度開く`** 選択肢が出てくる<br>
+> .devcontainerに複数フォルダ作られてたら自分に適した環境を選択<br>
+> - `.devcontainer/generic/devcontainer.json`
+> 	- CPU作業向け（通常はこちら）
+> - `.devcontainer/nvidia/devcontainer.json`
+> 	- CUDA/GPU検証向け
+> 
+> コンテナの環境構築は **`Dockerfile`** 、**`devcontainer.json`** にかく
+
 > ### gitの環境構築
 > ### 1. linuxターミナルで以下を実行する
 > ```bash
@@ -42,7 +63,8 @@
 > ### 3. git pushを行えたら成功
 >
 > ### gitの設定
-> 以下のコマンドを実行し、設定すると便利
+> 以下のコマンドを実行し、設定すると便利<br>
+> **`user.name`** と **`user.email`** は必須
 > 
 > ```bash
 > git config --global user.name "Your Name"
@@ -53,16 +75,4 @@
 > git config --global merge.conflictstyle diff3
 > ```
 > 
-> **`git config --global --list`**で設定一覧を表示できる。
-
-> ### dockerの環境構築
-> ### 1. Docker Desktopをインストール
-> **`Docker Desktop`** の公式サイトは[こちら](https://www.docker.com/products/docker-desktop/)<br>
-> dockerを使用する際は **`Docker Desktop`** を起動する必要がある。<br>
-> 一回起動したら閉じても大丈夫<br>
-> 
-> ### 2. vscodeの拡張機能 Dev Container をインストール
-> Dev Containerの識別子は **`ms-vscode-remote.remote-containers`** なので検索欄に入れたら出*てくる。<br>
-> vscodeなら左下の青い部分をクリックすることで **`コンテナで再度開く`** 選択肢が出てくる<br>
-> .devcontainerに複数フォルダ作られてたら自分に適した環境を選択<br>
-> コンテナの環境構築は **`Dockerfile`** 、**`devcontainer.json`** にかく
+> **`git config --global --list`** で設定一覧を表示できる。

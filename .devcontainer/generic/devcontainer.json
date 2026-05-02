@@ -1,45 +1,49 @@
 {
-  // Dev Container 名と、コンテナ内で開くワークスペースのパス。
-  // VS Code が起動後にどこをルートとして扱うかを固定する。
-  "name": "procon-sandbox(generic)",
-  "workspaceFolder": "/workspaces/procon-sandbox",
+	// Dev Container 名と、コンテナ内で開くワークスペースのパス。
+	// VS Code が起動後にどこをルートとして扱うかを固定する。
+	"name": "workspace(generic)",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
-  // .devcontainer 配下の Dockerfile を使って開発コンテナをビルドする。
-  // args は Dockerfile 側の ARG と対応し、ベースイメージやユーザーを揃えるために必要。
-  "build": {
-    "context": "../..",
-    "dockerfile": "../Dockerfile"
-  },
+	// .devcontainer 配下の Dockerfile を使って開発コンテナをビルドする。
+	// args は Dockerfile 側の ARG と対応し、ベースイメージやユーザーを揃えるために必要。
+	"build": {
+		"context": "../..",
+		"dockerfile": "../Dockerfile"
+	},
 
-  // envファイルの読み込み
-  "runArgs": [
-    "--env-file", ".env"
-  ],
+	// envファイルの読み込み
+	"runArgs": [
+		"--env-file", ".env"
+	],
 
-  // root ではなく通常ユーザーで開発する（権限事故の防止）。
-  "remoteUser": "dev",
+	// root ではなく通常ユーザーで開発する（権限事故の防止）。
+	"remoteUser": "dev",
 
-  // ワークスペースがマウントされた後に CreateCommand を実行
-  "postCreateCommand": "if [ -f /workspaces/procon-sandbox/.devcontainer/CreateCommand ]; then bash /workspaces/procon-sandbox/.devcontainer/CreateCommand; fi",
+	// ワークスペースがマウントされた後に CreateCommand を実行
+	"postCreateCommand": "if [ -f ${containerWorkspaceFolder}/.devcontainer/CreateCommand ]; then bash ${containerWorkspaceFolder}/.devcontainer/CreateCommand; fi",
 
-  // VS Code 側の開発体験を揃える（拡張機能・エディタ設定）。
-  "customizations": {
-    "vscode": {
-      // 拡張機能の追加
-      "extensions": [
-        "ms-vscode.cpptools",
-        "rust-lang.rust-analyzer",
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "ms-python.debugpy",
-        "mhutchie.git-graph",
-        "GitHub.codespaces",
-        "GitHub.vscode-pull-request-github",
-        "hediet.vscode-drawio"
-      ],
+	// VS Code 側の開発体験を揃える（拡張機能・エディタ設定）。
+	"customizations": {
+		"vscode": {
+			// 拡張機能の追加
+			"extensions": [
+				"ms-vscode.cpptools",
+				"ms-vscode.cmake-tools",
+				"rust-lang.rust-analyzer",
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-python.debugpy",
+				"mhutchie.git-graph",
+				"GitHub.codespaces",
+				"GitHub.vscode-pull-request-github",
+				"hediet.vscode-drawio",
+				"peterschmalfeldt.explorer-exclude",
+				"matepek.vscode-catch2-test-adapter"
+			],
 
-      "settings": {
-        // ターミナルは bash を使う。
+			// vscodeの設定
+			"settings": {
+				// ターミナルは bash を使う。
 				"terminal.integrated.defaultProfile.linux": "bash",
 				"terminal.integrated.profiles.linux": {
 					"bash": {
@@ -47,25 +51,48 @@
 					}
 				},
 
-        // 編集時の運用設定。
-        "files.autoSave": "onFocusChange",
-        "git-graph.repository.showTags": true,
-        "git.autofetch": "all",
-        "git.pruneOnFetch": true,
-        "git.autofetchPeriod": 180,
+				// 編集時の運用設定。
+				"files.autoSave": "onFocusChange",
+				"git-graph.repository.showTags": true,
+				"git.autofetch": "all",
+				"git.pruneOnFetch": true,
+				"git.autofetchPeriod": 180,
 
-        "[markdown]": {
-          "editor.wordWrap": "off"
-        },
-        "markdown.preview.scrollEditorWithPreview": false,
-        "markdown.preview.scrollPreviewWithEditor": false,
-        
-        // pythonインタプリタに仮想環境のパスを通す
-        "python.defaultInterpreterPath": "/home/dev/.venv/bin/python",
+				"[markdown]": {
+					"editor.wordWrap": "off"
+				},
+				"markdown.preview.scrollEditorWithPreview": false,
+				"markdown.preview.scrollPreviewWithEditor": false,
 
-        // 指定ポートが使用中の場合、別のポートへの自動フォールバックを無効化
-        "remote.autoForwardPortsFallback": 0
-      }
-    }
-  }
+				// pythonインタプリタに仮想環境のパスを通す
+				"python.defaultInterpreterPath": "/home/dev/.venv/bin/python",
+
+				// 指定ポートが使用中の場合、別のポートへの自動フォールバックを無効化
+				"remote.autoForwardPortsFallback": 0,
+
+				// pythonのテスター
+				"python.testing.pytestEnabled": true,
+				"python.testing.unittestEnabled": false,
+				"python.testing.pytestArgs": [
+					"--rootdir", "${workspaceFolder}/tester/python/unit"
+				],
+				"python.testing.cwd": "${workspaceFolder}",
+				"python.analysis.extraPaths": [
+					"${workspaceFolder}"
+				],
+				
+				// c++のテスター
+				"testMate.cpp.test.advancedExecutables": [
+					{
+						"pattern": "tester/cpp/build/**/*test*"
+					}
+				],
+				"cmake.sourceDirectory": "${workspaceFolder}/tester/cpp",
+				"cmake.buildDirectory": "${workspaceFolder}/tester/cpp/build",
+				"cmake.configureOnOpen": false,
+				"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+				"C_Cpp.default.compileCommands": "${workspaceFolder}/tester/cpp/build/compile_commands.json"
+			}
+		}
+	}
 }

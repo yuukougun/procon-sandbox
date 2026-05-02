@@ -3,6 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
+                "${workspaceFolder}",
                 "${workspaceFolder}/library",
                 "${workspaceFolder}/tester/cpp",
                 "${workspaceFolder}/tester/cpp/build/_deps/googletest-src/googletest/include",
