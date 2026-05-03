@@ -55,7 +55,7 @@ REPOSITORY
 │   │   └── docs-pages.yml          # C++/Pythonドキュメントの自動公開
 │   └── libraries.json              # ドキュメント公開対象ライブラリ定義
 │
-├── ai_learning/
+├── ai_trainer/
 │   ├── cpp/                        # C++エンジン
 │   ├── python/                     # 学習・推論・連携スクリプト
 │   │   ├── system_name/            # 系統ごとにサブディレクトリ
@@ -125,7 +125,7 @@ REPOSITORY
 │       └── bin/                    # 解法のビルド成果物
 │
 ├── diagrams/                       # 設計図（drawio）
-│   └── ai_learning/                # AI学習関連の設計図
+│   └── ai_trainer/                 # AI学習関連の設計図
 ├── images/                         # ドキュメント用画像
 │
 ├── docs/                           # 開発ルールと運用手順

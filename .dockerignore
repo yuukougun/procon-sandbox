@@ -4,11 +4,13 @@
 # Build artifacts and local bins
 **/build/
 **/target/
+**/dist/
 **/bin/
 **/__pycache__/
+**/data/
  
 # workflow、wandb、lightning_log metadata
-.spec-workflow
+.spec-workflow/
 wandb/
 lightning_logs/
 
