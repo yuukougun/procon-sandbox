@@ -14,6 +14,8 @@
 - [環境構築](/docs/environment_setup.md)
 - [リポジトリ設定](/docs/repo_settings.md)
 - [Dockerの使い方](/docs/docker_usage.md)
+    - [testerのドキュメント](/docs/tester-docs/README.md)
+    - [copilotのドキュメント](/docs/copilot-docs/github-copilot-cli-guide.md)
 
 <a id="ディレクトリ構成"></a>
 <details>
@@ -44,12 +46,14 @@ REPOSITORY
 │   └── mcp.json                    # MCP設定
 │
 ├── .github/
+│   ├── PULL_REQUEST_TEMPLATE/      # PRテンプレート
+│   ├── scripts/
+│   │   ├── build_docs_site.py      # ドキュメント生成とデプロイの実装
+│   │   └── detect_library_changes.py # ライブラリ変更の検出
 │   ├── workflows/
+│   │   ├── test.yml                # CIテストの実装
 │   │   └── docs-pages.yml          # C++/Pythonドキュメントの自動公開
-│   ├── libraries.json              # ドキュメント公開対象ライブラリ定義
-│   └── scripts/
-│       ├── build_docs_site.py      # ドキュメント生成とデプロイの実装
-│       └── detect_library_changes.py # ライブラリ変更の検出
+│   └── libraries.json              # ドキュメント公開対象ライブラリ定義
 │
 ├── ai_learning/
 │   ├── cpp/                        # C++エンジン
@@ -127,12 +131,27 @@ REPOSITORY
 ├── docs/                           # 開発ルールと運用手順
 │   ├── _navigation.md              # 目次定義（正本）
 │   ├── git-hooks/pre-commit        # docs更新時の自動生成フック
-│   └── script/gen-contribut        # CONTRIBUTING.md生成
+│   ├── script/gen-contribut.sh     # CONTRIBUTING.md生成
+│   └── docs-name/                  # ドキュメントごとにサブディレクトリ
+│       ├── _navigation.md          # 目次定義（サブドキュメントごと）
+│       └── README.md               # サブドキュメントの内容
 ├── CONTRIBUTING.md                 # docsから自動生成される統合ガイド
 │
+├── tester/                         # 既存プログラムの動作確認
+│   ├── python/
+│   │   ├── conftest.py
+│   │   └── unit/
+│   │       ├── library/
+│   │       ├── ai/
+│   │       └── python/
+│   └── cpp/
+│       ├── CMakeLists.txt
+│       └── unit/
+│           ├── library/
+│           ├── ai/
+│           └── python/
 ├── visualizer/                     # Desktop可視化クレート（eframe試作）
 ├── server/                         # 大会サーバー、他pcとの通信
-├── tester/                         # 既存プログラムの動作確認
 ├── benchmark/                      # 回答のベンチマーク
 │
 ├── MakeFile                        # コマンド集約
@@ -141,6 +160,7 @@ REPOSITORY
 ├── .env.example                    # .envのテンプレート
 ├── .dockerignore                   # Docker build時の除外定義
 ├── .gitignore                      # git管理から除外するファイル定義
+│
 ├── Cargo.toml                      # Rust workspaceルート
 │
 └── README.md                        # プロジェクト概要
@@ -389,14 +409,16 @@ namespace test{
 > | git add (ファイル名) | (ファイル名)をステージングする |
 > | git add . | すべてのファイルをステージングする |
 > | git commit -m (コミットメッセージ) | ステージングファイルをコミットする |
+> | git commit -n -m (コミットメッセージ) | pre-commitフックを実行せずにコミットする |
 > | git commit --amend -m (コミットメッセージ) | 直前のコミットメッセージを変更（ステージング状態は空にしておく） |
 > | git commit --allow-empty -m "空のコミット" | 空のコミットを作成する |
 > | git merge (ブランチ名) | (ブランチ名)を現在のブランチにマージ（mainにはpull requestする）|
 > | git merge --continue | mergeの再開 |
 > |  |  |
 > | git push | 現在のブランチのローカルの変更内容をリモートに送信 |
-> | git push origin (ブランチ名) | (ブランチ名)のローカルの変更内容をリモートに送信 |
+> | git push (ブランチ名) | (ブランチ名)のローカルの変更内容をリモートに送信 |
 > | git push -u origin (ブランチ名) | リモートに(ブランチ名)を追加してpushする |
+> | git push origin -d (ブランチ名) | リモートの(ブランチ名)を削除 |
 > | git pull | 現在のブランチのリモートの変更内容をローカルに取り込む |
 > | git pull origin (ブランチ名) | (ブランチ名)のリモートの変更内容をローカルに取り込む |
 > | git pull --rebase | 自分のcommitを他人のcommitの後に変える |
@@ -412,6 +434,8 @@ namespace test{
 > | git checkout (ブランチ名) -- (ファイル名) | (ブランチ名)から(ファイル名)をコピーしadd |
 > |  |  |
 > | git stash | 編集した内容を退避 |
+> | git stash -u | 新規作成したファイルも含めて編集した内容を退避 |
+> | git stash -a | 追跡対象外のファイルも含めて編集した内容を退避 |
 > | git stash list | stashの一覧を表示（stashの番号はこれで確認）|
 > | git stash show stash@{(番号)} | (番号)番目のstashを詳細表示 |
 > | git stash save (コメント) | stashに(コメント)をつけてstashする |
@@ -431,10 +455,12 @@ namespace test{
 > | git restore (ファイル名) | (ファイル名)で編集した内容を破棄（超危険） |
 > | git restore . | すべてのファイルで編集した内容を破棄（超危険） |
 > |  |  |
-> | git reflog | git操作の状態履歴を表示 |
-> | git reset --soft HEAD~(個数) | 直近(個数)個のコミットをステージング状態に戻す（危険） |
+> | git reflog | git操作の状態履歴を表示（履歴の番号はこれで確認） |
+> | git reset --soft ORIGIN_HEAD | マージ、リベース、リセットの処理をもとに戻す（危険） |
 > | git reset --soft HEAD^ | 直近１個のコミットをステージング状態に戻す。（危険）|
-> | git reset --hard HEAD@{(番号)} | リポジトリを(番号)番目の状態に戻す（超危険） |
+> | git reset --soft HEAD~(個数) | 直近(個数)個のコミットをステージング状態に戻す（危険） |
+> | git reset --soft (コミット値) | (コミット値)の状態に戻す（危険） |
+> | git reset --soft HEAD@{(番号)} | リポジトリを(番号)番目の状態に戻す（危険） |
 > |  |  |
 > | git tag | タグの一覧を表示 |
 > | git tag -a (タグ名) -m "(タグのコメント)" | 直近のコミットにタグを付ける |
@@ -756,7 +782,8 @@ Issueは「実装タスク」だけでなく「仕様確認」も含めて管理
 > ### 3. git pushを行えたら成功
 >
 > ### gitの設定
-> 以下のコマンドを実行し、設定すると便利
+> 以下のコマンドを実行し、設定すると便利<br>
+> **`user.name`** と **`user.email`** は必須
 > 
 > ```bash
 > git config --global user.name "Your Name"
@@ -767,9 +794,7 @@ Issueは「実装タスク」だけでなく「仕様確認」も含めて管理
 > git config --global merge.conflictstyle diff3
 > ```
 > 
-> **`git config --global --list`**で設定一覧を表示できる。
-
-## 6. 動作確認
+> **`git config --global --list`** で設定一覧を表示できる。
 </details>
 
 ---
@@ -833,6 +858,78 @@ Issueは「実装タスク」だけでなく「仕様確認」も含めて管理
 2. VS Codeでリポジトリを開く
 3. `Dev Containers: Reopen in Container` を実行
 4. `generic` または `nvidia` を選ぶ
+</details>
+
+---
+
+<a id="testerのドキュメント"></a>
+<details>
+<summary><span style="font-size:1.5em; font-weight:bold;">testerのドキュメント</span></summary>
+
+---
+
+# tester/docs
+
+このフォルダは、tester の仕組みを「ゼロ知識から実装できる」状態まで理解するための学習ドキュメントです。
+
+対象読者:
+- テスト未経験者
+- Python / C++ のどちらかしか触ったことがない人
+- VS Code Testing View や C++ TestMate の使い方が分からない人
+
+このドキュメントを読み切るとできること:
+- tester フォルダ構成の意味を説明できる
+- Python 側 pytest テスターを追加できる
+- C++ 側 GoogleTest + C++ TestMate のテスターを追加できる
+- ローカル実行、VS Code 実行、CI 実行の違いを理解して運用できる
+- 典型的なエラーを自力で切り分けできる
+
+---
+
+## 学習順序
+
+1. [01_prerequisites.md](01_prerequisites.md)
+2. [02_architecture.md](02_architecture.md)
+3. [03_python_pytest.md](03_python_pytest.md)
+4. [04_cpp_gtest_testmate.md](04_cpp_gtest_testmate.md)
+5. [05_implementation_from_scratch.md](05_implementation_from_scratch.md)
+6. [06_operations_ci.md](06_operations_ci.md)
+7. [07_troubleshooting.md](07_troubleshooting.md)
+
+---
+
+## 現在の実装ファイル一覧
+
+- Python 共通設定: `tester/python/conftest.py`
+- Python テスト実装: `tester/python/unit/library/test_array.py`
+- C++ テスト実装: `tester/cpp/unit/library/array_test.cpp`
+- C++ ビルド設定: `tester/cpp/CMakeLists.txt`
+- 一括実行: `Makefile`, `tester/testAll.py`
+- VS Code 設定: `.vscode/settings.json`, `.vscode/c_cpp_properties.json`
+
+---
+
+## まず最初に実行してみるコマンド
+
+プロジェクトルートで実行:
+
+```bash
+make test-py
+make test-cpp
+make test
+python3 tester/testAll.py
+```
+
+上記が通る状態を「基準状態」として、以降はこの状態を壊さないように機能追加していきます。
+</details>
+
+---
+
+<a id="copilotのドキュメント"></a>
+<details>
+<summary><span style="font-size:1.5em; font-weight:bold;">copilotのドキュメント</span></summary>
+
+---
 </details>
 
 ---

@@ -12,6 +12,8 @@
 - [環境構築](/docs/environment_setup.md) - now
 - [リポジトリ設定](/docs/repo_settings.md)
 - [Dockerの使い方](/docs/docker_usage.md)
+    - [testerのドキュメント](/docs/tester-docs/README.md)
+    - [copilotのドキュメント](/docs/copilot-docs/github-copilot-cli-guide.md)
 
 ## 環境構築
 <!-- END-NAVIGATION -->
@@ -63,7 +65,8 @@
 > ### 3. git pushを行えたら成功
 >
 > ### gitの設定
-> 以下のコマンドを実行し、設定すると便利
+> 以下のコマンドを実行し、設定すると便利<br>
+> **`user.name`** と **`user.email`** は必須
 > 
 > ```bash
 > git config --global user.name "Your Name"
@@ -74,6 +77,4 @@
 > git config --global merge.conflictstyle diff3
 > ```
 > 
-> **`git config --global --list`**で設定一覧を表示できる。
-
-## 6. 動作確認
+> **`git config --global --list`** で設定一覧を表示できる。
