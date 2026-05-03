@@ -46,12 +46,14 @@ REPOSITORY
 │   └── mcp.json                    # MCP設定
 │
 ├── .github/
+│   ├── PULL_REQUEST_TEMPLATE/      # PRテンプレート
+│   ├── scripts/
+│   │   ├── build_docs_site.py      # ドキュメント生成とデプロイの実装
+│   │   └── detect_library_changes.py # ライブラリ変更の検出
 │   ├── workflows/
+│   │   ├── test.yml                # CIテストの実装
 │   │   └── docs-pages.yml          # C++/Pythonドキュメントの自動公開
-│   ├── libraries.json              # ドキュメント公開対象ライブラリ定義
-│   └── scripts/
-│       ├── build_docs_site.py      # ドキュメント生成とデプロイの実装
-│       └── detect_library_changes.py # ライブラリ変更の検出
+│   └── libraries.json              # ドキュメント公開対象ライブラリ定義
 │
 ├── ai_learning/
 │   ├── cpp/                        # C++エンジン
@@ -129,12 +131,27 @@ REPOSITORY
 ├── docs/                           # 開発ルールと運用手順
 │   ├── _navigation.md              # 目次定義（正本）
 │   ├── git-hooks/pre-commit        # docs更新時の自動生成フック
-│   └── script/gen-contribut        # CONTRIBUTING.md生成
+│   ├── script/gen-contribut.sh     # CONTRIBUTING.md生成
+│   └── docs-name/                  # ドキュメントごとにサブディレクトリ
+│       ├── _navigation.md          # 目次定義（サブドキュメントごと）
+│       └── README.md               # サブドキュメントの内容
 ├── CONTRIBUTING.md                 # docsから自動生成される統合ガイド
 │
+├── tester/                         # 既存プログラムの動作確認
+│   ├── python/
+│   │   ├── conftest.py
+│   │   └── unit/
+│   │       ├── library/
+│   │       ├── ai/
+│   │       └── python/
+│   └── cpp/
+│       ├── CMakeLists.txt
+│       └── unit/
+│           ├── library/
+│           ├── ai/
+│           └── python/
 ├── visualizer/                     # Desktop可視化クレート（eframe試作）
 ├── server/                         # 大会サーバー、他pcとの通信
-├── tester/                         # 既存プログラムの動作確認
 ├── benchmark/                      # 回答のベンチマーク
 │
 ├── MakeFile                        # コマンド集約
@@ -143,6 +160,7 @@ REPOSITORY
 ├── .env.example                    # .envのテンプレート
 ├── .dockerignore                   # Docker build時の除外定義
 ├── .gitignore                      # git管理から除外するファイル定義
+│
 ├── Cargo.toml                      # Rust workspaceルート
 │
 └── README.md                        # プロジェクト概要
