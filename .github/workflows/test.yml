@@ -27,7 +27,22 @@ jobs:
       - name: Show g++ version
         run: g++ --version
 
+      - name: Count C++ test files
+        id: cpp_test_files
+        run: |
+          if [ -d tester/cpp/unit ]; then
+            count=$(find tester/cpp/unit -type f -name '*.cpp' | wc -l)
+          else
+            count=0
+          fi
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+
+      - name: Skip C++ tests when no test files
+        if: steps.cpp_test_files.outputs.count == '0'
+        run: echo "No C++ test files found under tester/cpp/unit. Skipping C++ tests."
+
       - name: Run C++ tests
+        if: steps.cpp_test_files.outputs.count != '0'
         run: make test-cpp
 
   python-test:
@@ -52,7 +67,22 @@ jobs:
       - name: Install pytest
         run: pip install pytest
 
+      - name: Count Python test files
+        id: python_test_files
+        run: |
+          if [ -d tester/python/unit ]; then
+            count=$(find tester/python/unit -type f -name '*.py' | wc -l)
+          else
+            count=0
+          fi
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+
+      - name: Skip Python tests when no test files
+        if: steps.python_test_files.outputs.count == '0'
+        run: echo "No Python test files found under tester/python/unit. Skipping Python tests."
+
       - name: Run Python tests
+        if: steps.python_test_files.outputs.count != '0'
         run: make test-py
 
   all-tests:
@@ -73,4 +103,4 @@ jobs:
             echo "At least one required test job failed."
             exit 1
           fi
-          echo "Both C++ and Python tests passed."
+          echo "Both C++ and Python test jobs succeeded."
