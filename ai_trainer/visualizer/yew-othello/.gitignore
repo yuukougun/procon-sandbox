@@ -1,7 +1,0 @@
-dist/
-yew-othello_bg.wasm
-yew-othello.js
-yew-othello.d.ts
-*.wasm
-*.js
-*.d.ts
