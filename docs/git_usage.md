@@ -64,6 +64,8 @@
 > | git checkout (ブランチ名) -- (ファイル名) | (ブランチ名)から(ファイル名)をコピーしadd |
 > |  |  |
 > | git stash | 編集した内容を退避 |
+> | git stash -u | 新規作成したファイルも含めて編集した内容を退避 |
+> | git stash -a | 追跡対象外のファイルも含めて編集した内容を退避 |
 > | git stash list | stashの一覧を表示（stashの番号はこれで確認）|
 > | git stash show stash@{(番号)} | (番号)番目のstashを詳細表示 |
 > | git stash save (コメント) | stashに(コメント)をつけてstashする |
