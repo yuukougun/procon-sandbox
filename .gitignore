@@ -2,13 +2,16 @@ memo*
 *.log
 *.bin
 .env
-.spec-workflow
+
+.spec-workflow/
 wandb/
 lightning_logs/
 
 **/build/
 **/target/
+**/dist/
 **/bin/
 **/__pycache__/
+**/data/
 
 .vscode/settings.json
