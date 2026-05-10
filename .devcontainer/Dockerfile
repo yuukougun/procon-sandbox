@@ -31,6 +31,7 @@ ARG USER_GID=1000
 RUN groupadd --gid ${USER_GID} ${USERNAME} \
     && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} \
     && usermod -aG sudo ${USERNAME} \
+    && echo "${USERNAME}:password" | sudo chpasswd \
     && mkdir -p /etc/sudoers.d \
     && echo "%sudo ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/00-sudo-nopasswd \
     && chmod 440 /etc/sudoers.d/00-sudo-nopasswd

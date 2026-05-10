@@ -11,6 +11,7 @@
  
 # workflow、wandb、lightning_log metadata
 .spec-workflow/
+.pytest_cache/
 wandb/
 lightning_logs/
 

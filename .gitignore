@@ -4,6 +4,7 @@ memo*
 .env
 
 .spec-workflow/
+.pytest_cache/
 wandb/
 lightning_logs/
 
