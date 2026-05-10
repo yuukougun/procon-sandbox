@@ -9,3 +9,5 @@ git config core.hooksPath docs/git-hooks
 chmod +x docs/git-hooks/*
 
 git config merge.ff false
+
+sudo service ssh start

@@ -25,3 +25,6 @@ gh
 locales
 curl
 gnupg
+
+# SSH server
+openssh-server
